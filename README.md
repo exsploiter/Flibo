@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ Flibo
+#  Flibo 🃏
 ### Autonomous Attack Surface Reconnaissance & Threat Intelligence Engine
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen?style=flat-square)](https://github.com/exsploiter/Flibo)
