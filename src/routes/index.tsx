@@ -20,12 +20,13 @@ export const Route = createFileRoute("/")({
   component: Dashboard,
   head: () => ({
     meta: [
-      { title: "VEKTOR — Recon Dashboard" },
+      { title: "Flibo — Recon Dashboard" },
       {
         name: "description",
         content: "Live overview of recon scans, findings and ranked attack vectors.",
       },
-      { property: "og:title", content: "VEKTOR — Recon Dashboard" },
+      { property: "og:title", content: "Flibo — Recon Dashboard" },
+
       {
         property: "og:description",
         content: "Live overview of recon scans, findings and ranked attack vectors.",

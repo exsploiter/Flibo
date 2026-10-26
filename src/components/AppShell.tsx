@@ -40,11 +40,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             <TerminalSquare className="size-5" strokeWidth={2.4} />
           </div>
           <div>
-            <div className="font-mono text-lg font-bold tracking-tight leading-none">VEKTOR</div>
+            <div className="font-mono text-lg font-bold tracking-tight leading-none">FLIBO</div>
             <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-              recon · vector ops
+              recon · security ops
             </div>
           </div>
+
         </div>
 
         <nav className="flex flex-1 flex-col gap-1 px-3">
@@ -88,7 +89,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <div className="flex size-8 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                 <TerminalSquare className="size-4" />
               </div>
-              <span className="font-mono text-sm font-bold">VEKTOR</span>
+              <span className="font-mono text-sm font-bold">FLIBO</span>
             </Link>
 
             {/* Mobile nav pills */}
@@ -128,8 +129,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 md:px-6 md:py-8">{children}</main>
 
         <footer className="no-print border-t border-border/40 px-6 py-4 font-mono text-[11px] text-muted-foreground/70">
-          VEKTOR — private recon automation console · personal use
+          Flibo — private recon automation console · personal use
         </footer>
+
       </div>
     </div>
   );

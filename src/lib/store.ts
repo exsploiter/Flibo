@@ -3,7 +3,8 @@ import type { Scan } from "./types";
 import { seedScans } from "./mock";
 import { api } from "./api";
 
-const KEY = "vektor.scans.v1";
+const KEY = "flibo.scans.v1";
+
 
 type Listener = () => void;
 
@@ -128,7 +129,7 @@ export function togglePin(id: string) {
 
 // ---------- target history (for autocomplete) ----------
 
-const TARGETS_KEY = "vektor.targets.v1";
+const TARGETS_KEY = "flibo.targets.v1";
 
 export function addTargetHistory(targets: string[]) {
   try {
@@ -150,7 +151,8 @@ export function getTargetHistory(): string[] {
 
 // ---------- generic persisted settings ----------
 
-const SETTINGS_KEY = "vektor.settings.v1";
+const SETTINGS_KEY = "flibo.settings.v1";
+
 
 export interface AppSettings {
   cveApiKey: string;

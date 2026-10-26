@@ -4,7 +4,8 @@ import type { AppSettings, Scan } from "./types";
 import { seedScans } from "../lib/mock";
 
 const DATA_DIR = path.resolve(process.cwd(), ".data");
-const DB_FILE = path.join(DATA_DIR, "vektor_db.json");
+const DB_FILE = path.join(DATA_DIR, "flibo_db.json");
+
 
 interface DatabaseSchema {
   version: number;

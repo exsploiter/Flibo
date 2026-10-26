@@ -21,9 +21,10 @@ export const Route = createFileRoute("/history")({
   component: HistoryPage,
   head: () => ({
     meta: [
-      { title: "Scan History — VEKTOR" },
+      { title: "Scan History — Flibo" },
       { name: "description", content: "Search, re-run, pin and manage past recon scans." },
-      { property: "og:title", content: "Scan History — VEKTOR" },
+      { property: "og:title", content: "Scan History — Flibo" },
+
       { property: "og:description", content: "Search, re-run, pin and manage past recon scans." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ VEKTOR (Flibo)
+# ⚡ Flibo
 ### Autonomous Attack Surface Reconnaissance & Threat Intelligence Engine
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen?style=flat-square)](https://github.com/exsploiter/Flibo)
@@ -20,7 +20,8 @@
 
 ## 🌐 Overview
 
-**VEKTOR** transforms raw domain names, IP addresses, and CIDR blocks into actionable threat intelligence. Built from the ground up with a reactive frontend and a multi-agent backend engine, VEKTOR autonomously maps perimeters, audits network ports, identifies misconfigurations, correlates Common Vulnerabilities and Exposures (CVEs), and synthesizes exploit attack vectors in real-time.
+**Flibo** transforms raw domain names, IP addresses, and CIDR blocks into actionable threat intelligence. Built from the ground up with a reactive frontend and a multi-agent backend engine, Flibo autonomously maps perimeters, audits network ports, identifies misconfigurations, correlates Common Vulnerabilities and Exposures (CVEs), and synthesizes exploit attack vectors in real-time.
+
 
 ---
 
@@ -38,7 +39,8 @@
 
 ## 🏛 Architecture
 
-VEKTOR separates concerns cleanly between a responsive client interface, an API gateway, an asynchronous task engine, and modular scanner agents.
+Flibo separates concerns cleanly between a responsive client interface, an API gateway, an asynchronous task engine, and modular scanner agents.
+
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -76,7 +78,8 @@ VEKTOR separates concerns cleanly between a responsive client interface, an API 
 │                ATTACK VECTOR SYNTHESIS & RISK ENGINE                    │
 │  • Correlates multi-agent discoveries into ranked threat chains         │
 │  • Computes composite Risk Score (0 - 100) and severity breakdowns      │
-│  • Persists to atomic database layer (.data/vektor_db.json)             │
+│  • Persists to atomic database layer (.data/flibo_db.json)              │
+
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -173,7 +176,8 @@ All backend endpoints are served under `/api`:
 
 ## 🧪 Testing
 
-VEKTOR includes an automated test suite powered by [Vitest](https://vitest.dev/) covering scanner logic, CVSS calculations, attack vector synthesis, database transactions, and REST API routes:
+Flibo includes an automated test suite powered by [Vitest](https://vitest.dev/) covering scanner logic, CVSS calculations, attack vector synthesis, database transactions, and REST API routes:
+
 
 ```bash
 npm run test

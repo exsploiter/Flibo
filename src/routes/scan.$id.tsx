@@ -49,9 +49,10 @@ export const Route = createFileRoute("/scan/$id")({
   component: ScanDetail,
   head: () => ({
     meta: [
-      { title: "Scan Detail — VEKTOR" },
+      { title: "Scan Detail — Flibo" },
       { name: "description", content: "Live agent status, streamed output, findings and attack vectors." },
-      { property: "og:title", content: "Scan Detail — VEKTOR" },
+      { property: "og:title", content: "Scan Detail — Flibo" },
+
       { property: "og:description", content: "Live agent status, streamed output, findings and attack vectors." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

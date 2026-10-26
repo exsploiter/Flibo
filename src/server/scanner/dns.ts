@@ -141,8 +141,9 @@ export async function runDnsScan(options: DnsScanOptions): Promise<Finding[]> {
     const timeout = setTimeout(() => controller.abort(), 2800);
     const crtRes = await fetch(`https://crt.sh/?q=%25.${encodeURIComponent(host)}&output=json`, {
       signal: controller.signal,
-      headers: { "User-Agent": "VektorReconBot/2.0" },
+      headers: { "User-Agent": "FliboReconBot/2.0" },
     }).catch(() => null);
+
     clearTimeout(timeout);
 
     if (crtRes && crtRes.ok) {

@@ -45,7 +45,7 @@ export async function runHttpScan(options: HttpScanOptions): Promise<Finding[]> 
       redirect: "follow",
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 VektorRecon/2.0",
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 FliboRecon/2.0",
       },
     });
     clearTimeout(timeout);
@@ -58,8 +58,9 @@ export async function runHttpScan(options: HttpScanOptions): Promise<Finding[]> 
       res = await fetch(httpUrl, {
         signal: controller.signal,
         redirect: "follow",
-        headers: { "User-Agent": "VektorRecon/2.0" },
+        headers: { "User-Agent": "FliboRecon/2.0" },
       });
+
       clearTimeout(timeout);
 
       findings.push({
@@ -245,8 +246,9 @@ export async function runHttpScan(options: HttpScanOptions): Promise<Finding[]> 
   try {
     options.onLog(`[TechFingerprint] Probing ${activeUrl}/robots.txt...`);
     const robotsRes = await fetch(`${activeUrl}/robots.txt`, {
-      headers: { "User-Agent": "VektorRecon/2.0" },
+      headers: { "User-Agent": "FliboRecon/2.0" },
     }).catch(() => null);
+
 
     if (robotsRes && robotsRes.ok) {
       const robotsTxt = await robotsRes.text();

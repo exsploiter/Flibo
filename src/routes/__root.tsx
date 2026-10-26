@@ -78,9 +78,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "VEKTOR — Recon & Attack Surface Console" },
-      { name: "description", content: "Recon automation and AI-assisted attack vector mapping console." },
-      { property: "og:title", content: "VEKTOR — Recon & Attack Surface Console" },
+      { title: "Flibo — Recon & Attack Surface Console" },
+      { name: "description", content: "Recon automation and attack vector mapping console." },
+      { property: "og:title", content: "Flibo — Recon & Attack Surface Console" },
+
       { property: "og:description", content: "Recon automation and AI-assisted attack vector mapping console." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

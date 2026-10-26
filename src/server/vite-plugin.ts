@@ -1,9 +1,9 @@
 import type { Plugin } from "vite";
 import { handleNodeApi } from "./api";
 
-export function vektorApiPlugin(): Plugin {
+export function fliboApiPlugin(): Plugin {
   return {
-    name: "vektor-api-plugin",
+    name: "flibo-api-plugin",
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         if (req.url && (req.url.startsWith("/api/") || req.url === "/api")) {

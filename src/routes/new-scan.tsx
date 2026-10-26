@@ -27,9 +27,10 @@ export const Route = createFileRoute("/new-scan")({
   component: NewScan,
   head: () => ({
     meta: [
-      { title: "New Scan — VEKTOR" },
+      { title: "New Scan — Flibo" },
       { name: "description", content: "Paste targets, pick agents, launch recon." },
-      { property: "og:title", content: "New Scan — VEKTOR" },
+      { property: "og:title", content: "New Scan — Flibo" },
+
       { property: "og:description", content: "Paste targets, pick agents, launch recon." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

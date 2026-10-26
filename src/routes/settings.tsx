@@ -12,9 +12,10 @@ export const Route = createFileRoute("/settings")({
   component: SettingsPage,
   head: () => ({
     meta: [
-      { title: "Settings — VEKTOR" },
+      { title: "Settings — Flibo" },
       { name: "description", content: "API keys, notification preferences and defaults." },
-      { property: "og:title", content: "Settings — VEKTOR" },
+      { property: "og:title", content: "Settings — Flibo" },
+
       { property: "og:description", content: "API keys, notification preferences and defaults." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -118,7 +119,7 @@ function SettingsPage() {
             <Input
               value={s.notifyEmailTo}
               onChange={(e) => set("notifyEmailTo", e.target.value)}
-              placeholder="operator@vektor.local"
+              placeholder="operator@flibo.local"
               className="mt-1.5 rounded-xl border-border/60 bg-background/70 font-mono text-xs"
             />
           </div>

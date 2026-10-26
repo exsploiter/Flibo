@@ -5,9 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * VEKTOR design system — dark-first, ember orange on warm black.
+ * Flibo design system — dark-first, ember orange on warm black.
  * All colors are oklch semantic tokens. Components must never hardcode colors.
  */
+
 
 @theme {
   --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
