@@ -30,7 +30,7 @@ Used during engagement setup, active target scoping, internal network sweeps, an
 
 ## Brand Commitments
 - Name: Flibo (strictly Flibo, never VEKTOR).
-- Aesthetic: Tactical dark-first design, warm ember orange primary (`oklch(0.68 0.135 41)`), rich dark vignette, high contrast.
+- Aesthetic: Professional tactical dark palette: deep obsidian slate canvas (`oklch(0.12 0.006 250)`), surgical amber primary (`oklch(0.72 0.185 48)`), high-contrast foreground, calibrated CVSS severity scale.
 - Typography: Sora for geometric display clarity, JetBrains Mono for telemetry, data, and terminal logs.
 - Tone: Utilitarian, precise, tactical, mission-oriented.
 

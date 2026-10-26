@@ -122,7 +122,7 @@ function Dashboard() {
       </div>
 
       {/* Single Compact Status Strip */}
-      <div className="grid grid-cols-2 divide-y divide-border/60 rounded-xl border border-border/60 bg-card/40 sm:grid-cols-5 sm:divide-x sm:divide-y-0">
+      <div className="grid grid-cols-2 divide-y divide-border/60 rounded-xl border border-border/60 bg-card sm:grid-cols-5 sm:divide-x sm:divide-y-0">
         <div className="p-3.5 text-center sm:text-left sm:pl-4">
           <div className="text-xs text-muted-foreground">Monitored Targets</div>
           <div className="mt-1 font-mono text-lg font-semibold tabular-nums text-foreground">
@@ -183,7 +183,7 @@ function Dashboard() {
             </Link>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-border/60 bg-card/40">
+          <div className="overflow-hidden rounded-xl border border-border/60 bg-card">
             {mounted && recent.length === 0 ? (
               <div className="py-16 text-center text-sm text-muted-foreground">
                 No scans recorded. Launch a new scan to begin target reconnaissance.
@@ -265,7 +265,7 @@ function Dashboard() {
         {/* Secondary Intelligence Panel */}
         <div className="space-y-6">
           {/* Severity Distribution */}
-          <section className="rounded-xl border border-border/60 bg-card/40 p-4">
+          <section className="rounded-xl border border-border/60 bg-card p-4">
             <h2 className="text-sm font-semibold text-foreground">Severity Distribution</h2>
             <div className="mt-3.5 space-y-2.5">
               {SEVERITY_ORDER.map((sev) => (
@@ -288,7 +288,7 @@ function Dashboard() {
           </section>
 
           {/* Key Attack Vectors */}
-          <section className="rounded-xl border border-border/60 bg-card/40 p-4">
+          <section className="rounded-xl border border-border/60 bg-card p-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold text-foreground">Key Attack Vectors</h2>
               <span className="font-mono text-xs tabular-nums text-muted-foreground">

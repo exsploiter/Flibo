@@ -1,7 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Crosshair, History, Radar, Settings2, TerminalSquare, Zap } from "lucide-react";
+import { Crosshair, History, Moon, Radar, Settings2, Sun, TerminalSquare, Zap } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/lib/theme";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: Radar },
@@ -30,11 +31,12 @@ function NavItem({ to, label, icon: Icon, active }: { to: string; label: string;
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { theme, toggle } = useTheme();
 
   return (
     <div className="ambient-grid min-h-screen">
       {/* Sidebar */}
-      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border/60 bg-card/50 backdrop-blur-xl md:flex">
+      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border/60 bg-card/90 shadow-sm backdrop-blur-lg md:flex">
         <div className="flex items-center gap-3 px-5 py-6">
           <div className="glow-primary flex size-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
             <TerminalSquare className="size-5" strokeWidth={2.4} />
@@ -64,7 +66,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
 
         <div className="px-4 pb-5">
-          <div className="rounded-2xl border border-border/60 bg-background/60 p-3">
+          <div className="rounded-2xl border border-border/60 bg-muted/50 p-3">
             <div className="flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
               <span className="relative flex size-2">
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-low opacity-60" />
@@ -82,7 +84,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Main column */}
       <div className="flex min-h-screen flex-col md:pl-60">
-        <header className="no-print sticky top-0 z-20 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+        <header className="no-print sticky top-0 z-20 border-b border-border/60 bg-background/90 shadow-xs backdrop-blur-lg">
           <div className="mx-auto flex w-full max-w-[1440px] items-center gap-3 px-4 py-3 md:px-6">
             {/* Mobile brand */}
             <Link to="/" className="flex items-center gap-2 md:hidden">
@@ -110,11 +112,18 @@ export function AppShell({ children }: { children: ReactNode }) {
               ))}
             </div>
 
-            <div className="ml-auto flex items-center gap-3">
-              <div className="hidden items-center gap-2 rounded-full border border-border/60 bg-card/70 px-3 py-1.5 font-mono text-[11px] text-muted-foreground sm:flex">
+            <div className="ml-auto flex items-center gap-2">
+              <div className="hidden items-center gap-2 rounded-full border border-border/60 bg-muted/50 px-3 py-1.5 font-mono text-[11px] text-muted-foreground sm:flex">
                 <span className="size-1.5 rounded-full bg-low" />
                 opsec · passive mode
               </div>
+              <button
+                onClick={toggle}
+                aria-label="Toggle theme"
+                className="flex size-9 items-center justify-center rounded-xl border border-border/60 bg-card text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              >
+                {theme === "light" ? <Moon className="size-4" /> : <Sun className="size-4" />}
+              </button>
               <Link
                 to="/new-scan"
                 className="glow-primary inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"

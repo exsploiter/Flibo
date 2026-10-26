@@ -33,7 +33,7 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-3xl border border-border/60 bg-card/60 p-6">
+    <section className="rounded-3xl border border-border/60 bg-card p-6">
       <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
         <Icon className="size-4 text-primary" /> {title}
       </h2>
@@ -97,14 +97,14 @@ function SettingsPage() {
       </Card>
 
       <Card icon={Bell} title="Notifications">
-        <div className="flex items-center justify-between rounded-2xl border border-border/50 bg-background/40 px-4 py-3">
+        <div className="flex items-center justify-between rounded-2xl border border-border/50 bg-muted/40 px-4 py-3">
           <div>
             <div className="text-sm font-medium">In-app toast on completion</div>
             <div className="text-xs text-muted-foreground">Notify when a scan finishes or partially fails</div>
           </div>
           <Switch checked={s.notifyInApp} onCheckedChange={(v) => set("notifyInApp", v)} />
         </div>
-        <div className="flex items-center justify-between rounded-2xl border border-border/50 bg-background/40 px-4 py-3">
+        <div className="flex items-center justify-between rounded-2xl border border-border/50 bg-muted/40 px-4 py-3">
           <div>
             <div className="text-sm font-medium">Email on completion</div>
             <div className="text-xs text-muted-foreground">Requires a configured mail relay</div>

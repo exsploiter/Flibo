@@ -88,7 +88,7 @@ export function EmptyState({
   body: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border/70 bg-card/30 px-6 py-14 text-center">
+    <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border/70 bg-muted/30 px-6 py-14 text-center">
       <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
         <Icon className="size-5" />
       </div>

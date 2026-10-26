@@ -94,7 +94,7 @@ function SeverityRing({ score }: { score: number }) {
 function CveCard({ f }: { f: Finding }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/60">
+    <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/40"
@@ -283,7 +283,7 @@ function ScanDetail() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="rounded-3xl border border-border/60 bg-card/60 p-5">
+      <div className="rounded-3xl border border-border/60 bg-card p-5">
         <div className="flex flex-wrap items-start gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -428,7 +428,7 @@ function ScanDetail() {
       {/* Agents */}
       <div className="no-print grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {scan.agents.map((a) => (
-          <div key={a.id} className="rounded-2xl border border-border/60 bg-card/60 p-4">
+          <div key={a.id} className="rounded-2xl border border-border/60 bg-card p-4">
             <div className="flex items-center gap-2">
               <AgentStatusDot status={a.status} />
               <span className="truncate text-sm font-medium">{a.name}</span>
@@ -479,7 +479,7 @@ function ScanDetail() {
         <div className="mt-4">
           {tab === "summary" && (
             <div className="grid gap-6 lg:grid-cols-3">
-              <div className="rounded-3xl border border-border/60 bg-card/60 p-6">
+              <div className="rounded-3xl border border-border/60 bg-card p-6">
                 <h3 className="mb-4 text-center font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
                   Risk score
                 </h3>
@@ -488,7 +488,7 @@ function ScanDetail() {
                   Weighted from {scan.findings.length} findings across {scan.agents.length} agents
                 </p>
               </div>
-              <div className="rounded-3xl border border-border/60 bg-card/60 p-6">
+              <div className="rounded-3xl border border-border/60 bg-card p-6">
                 <h3 className="mb-4 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
                   Severity breakdown
                 </h3>
@@ -509,13 +509,13 @@ function ScanDetail() {
                   ))}
                 </div>
               </div>
-              <div className="rounded-3xl border border-border/60 bg-card/60 p-6">
+              <div className="rounded-3xl border border-border/60 bg-card p-6">
                 <h3 className="mb-4 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
                   Suggested entry points
                 </h3>
                 <div className="space-y-2">
                   {vectors.slice(0, 5).map((v) => (
-                    <div key={v.id} className="rounded-xl border border-border/50 bg-background/40 p-3">
+                    <div key={v.id} className="rounded-xl border border-border/50 bg-muted/40 p-3">
                       <div className="flex items-start gap-2">
                         <SeverityBadge severity={v.severity} />
                         <span className="text-sm font-medium leading-snug">{v.title}</span>
@@ -538,7 +538,7 @@ function ScanDetail() {
             (portFindings.length === 0 ? (
               <EmptyState icon={Server} title="No open ports recorded" body="Port Scan hasn't reported results for this target yet." />
             ) : (
-              <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/60">
+              <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border/40 bg-muted/30 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -578,7 +578,7 @@ function ScanDetail() {
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {techFindings.map((f) => (
-                  <div key={f.id} className="rounded-2xl border border-border/60 bg-card/60 p-4">
+                  <div key={f.id} className="rounded-2xl border border-border/60 bg-card p-4">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-mono text-sm font-semibold">{f.service} <span className="text-muted-foreground">{f.version}</span></span>
                       <SeverityBadge severity={f.severity} />
@@ -595,7 +595,7 @@ function ScanDetail() {
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {subFindings.map((f) => (
-                  <div key={f.id} className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/60 px-4 py-3">
+                  <div key={f.id} className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card px-4 py-3">
                     <Globe className="size-4 shrink-0 text-info" />
                     <span className="truncate font-mono text-sm">{f.title}</span>
                     <SeverityBadge severity={f.severity} className="ml-auto shrink-0" />
@@ -623,7 +623,7 @@ function ScanDetail() {
             ) : (
               <div className="space-y-3">
                 {vectors.map((v, i) => (
-                  <div key={v.id} className="flex items-start gap-4 rounded-2xl border border-border/60 bg-card/60 p-4">
+                  <div key={v.id} className="flex items-start gap-4 rounded-2xl border border-border/60 bg-card p-4">
                     <span className="font-mono text-2xl font-bold text-primary/50">#{i + 1}</span>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -642,7 +642,7 @@ function ScanDetail() {
             (allFindings.length === 0 ? (
               <EmptyState icon={Bug} title="No findings yet" body="Agents haven't reported anything for this target." />
             ) : (
-              <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/60">
+              <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
                 {allFindings.map((f) => (
                   <div key={f.id} className="border-b border-border/30 last:border-0">
                     <button
@@ -699,7 +699,7 @@ function ScanDetail() {
           {tab === "output" && (
             <div className="grid gap-4 lg:grid-cols-2">
               {scan.agents.map((a) => (
-                <div key={a.id} className="rounded-2xl border border-border/60 bg-card/60 p-4">
+                <div key={a.id} className="rounded-2xl border border-border/60 bg-card p-4">
                   <div className="mb-3 flex items-center gap-2">
                     <AgentStatusDot status={a.status} />
                     <span className="text-sm font-medium">{a.name}</span>

@@ -125,7 +125,7 @@ function HistoryPage() {
           body={q || status !== "all" ? "Try clearing the search or status filter." : "Run your first scan to populate history."}
         />
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/60">
+        <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border/40 bg-muted/30 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">

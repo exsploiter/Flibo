@@ -169,7 +169,7 @@ function NewScan() {
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Targets column */}
         <div className="space-y-4 lg:col-span-3">
-          <section className="rounded-3xl border border-border/60 bg-card/60 p-5">
+          <section className="rounded-3xl border border-border/60 bg-card p-5">
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-sm font-semibold text-foreground">
                 Target Scope
@@ -265,7 +265,7 @@ function NewScan() {
             )}
           </section>
 
-          <section className="rounded-3xl border border-border/60 bg-card/60 p-5">
+          <section className="rounded-3xl border border-border/60 bg-card p-5">
             <h2 className="text-sm font-semibold text-foreground">
               Agent Pipeline Selection
             </h2>
@@ -275,7 +275,7 @@ function NewScan() {
                 return (
                   <label
                     key={a.id}
-                    className="flex cursor-pointer items-center gap-3 rounded-2xl border border-border/50 bg-background/40 px-4 py-3 transition-colors hover:border-primary/30"
+                    className="flex cursor-pointer items-center gap-3 rounded-2xl border border-border/50 bg-muted/40 px-4 py-3 transition-colors hover:border-primary/30"
                   >
                     <Switch checked={on} onCheckedChange={(v) =>
                       setSelectedAgents((prev) => (v ? [...prev, a.id] : prev.filter((x) => x !== a.id)))
@@ -300,7 +300,7 @@ function NewScan() {
 
         {/* Config column */}
         <div className="space-y-4 lg:col-span-2">
-          <section className="rounded-3xl border border-border/60 bg-card/60 p-5">
+          <section className="rounded-3xl border border-border/60 bg-card p-5">
             <h2 className="text-sm font-semibold text-foreground">
               Pre-configured Profiles
             </h2>
@@ -317,7 +317,7 @@ function NewScan() {
             </div>
           </section>
 
-          <section className="rounded-3xl border border-border/60 bg-card/60 p-5">
+          <section className="rounded-3xl border border-border/60 bg-card p-5">
             <h2 className="text-sm font-semibold text-foreground">
               Scan Intensity
             </h2>
@@ -332,7 +332,7 @@ function NewScan() {
                   className={`rounded-2xl border p-3 text-left transition-colors ${
                     intensity === i.id
                       ? "border-primary/50 bg-primary/10"
-                      : "border-border/50 bg-background/40 hover:border-border"
+                      : "border-border/50 bg-muted/40 hover:border-border"
                   }`}
                 >
                   <div className={`text-sm font-semibold ${intensity === i.id ? "text-primary" : ""}`}>
@@ -372,7 +372,7 @@ function NewScan() {
               )}
             </div>
 
-            <div className="mt-5 flex items-center justify-between rounded-2xl border border-border/50 bg-background/40 px-4 py-3">
+            <div className="mt-5 flex items-center justify-between rounded-2xl border border-border/50 bg-muted/40 px-4 py-3">
               <div className="flex items-center gap-2">
                 <EyeOff className="size-4 text-medium" />
                 <div>
@@ -392,7 +392,7 @@ function NewScan() {
             </div>
           </section>
 
-          <section className="rounded-3xl border border-border/60 bg-card/60 p-5">
+          <section className="rounded-3xl border border-border/60 bg-card p-5">
             <div className="space-y-3">
               <div>
                 <Label className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">

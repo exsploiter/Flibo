@@ -5,7 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Flibo design system — dark-first, ember orange on warm black.
+ * Flibo design system — peach orange & light grey.
+ * Warm, airy canvas with soft peach accent. Light-first.
  * All colors are oklch semantic tokens. Components must never hardcode colors.
  */
 
@@ -52,78 +53,107 @@
   --color-medium: var(--medium);
   --color-low: var(--low);
   --color-info: var(--info);
+  --color-accent-tint: var(--accent-tint);
 }
 
 :root {
-  --radius: 1rem;
+  --radius: 0.75rem;
 
-  --background: oklch(0.145 0.012 45);
-  --foreground: oklch(0.945 0.012 70);
-  --card: oklch(0.185 0.014 45);
-  --card-foreground: oklch(0.945 0.012 70);
-  --popover: oklch(0.205 0.016 45);
-  --popover-foreground: oklch(0.945 0.012 70);
-  --primary: oklch(0.68 0.135 41);
-  --primary-foreground: oklch(0.16 0.04 41);
-  --secondary: oklch(0.245 0.016 45);
-  --secondary-foreground: oklch(0.93 0.02 70);
-  --muted: oklch(0.235 0.014 45);
-  --muted-foreground: oklch(0.66 0.02 60);
-  --accent: oklch(0.27 0.03 42);
-  --accent-foreground: oklch(0.93 0.04 55);
-  --destructive: oklch(0.62 0.21 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.275 0.015 45);
-  --input: oklch(0.265 0.015 45);
-  --ring: oklch(0.68 0.135 41);
-  --critical: oklch(0.62 0.22 25);
-  --high: oklch(0.66 0.17 45);
-  --medium: oklch(0.79 0.15 85);
-  --low: oklch(0.72 0.13 165);
-  --info: oklch(0.7 0.1 235);
-  --chart-1: oklch(0.68 0.135 41);
-  --chart-2: oklch(0.62 0.22 25);
-  --chart-3: oklch(0.79 0.15 85);
-  --chart-4: oklch(0.72 0.13 165);
-  --chart-5: oklch(0.7 0.1 235);
+  /* Canvas — light warm grey from user swatch */
+  --background: #f1f0ed;
+  /* Primary text — deep graphite */
+  --foreground: #1a1918;
+  /* Card — clean surface */
+  --card: #ffffff;
+  --card-foreground: #1a1918;
+  /* Popover */
+  --popover: #ffffff;
+  --popover-foreground: #1a1918;
+  /* Primary — peach orange */
+  --primary: #e8742a;
+  --primary-foreground: #ffffff;
+  /* Secondary — subtle warm grey */
+  --secondary: #e6e4df;
+  --secondary-foreground: #2d2c2a;
+  /* Muted */
+  --muted: #e8e6e1;
+  --muted-foreground: #6c6962;
+  /* Accent — hover surface */
+  --accent: #e4e2dd;
+  --accent-foreground: #1a1918;
+  /* Destructive */
+  --destructive: #d33824;
+  --destructive-foreground: #ffffff;
+  /* Border — refined warm grey */
+  --border: #d4d1cb;
+  --input: #dcd9d3;
+  --ring: #e8742a;
+  /* Peach tint for subtle backgrounds */
+  --accent-tint: rgba(232, 116, 42, 0.10);
+
+  /* Severity — reserved for severity only */
+  --critical: #d33824;
+  --high: #e8742a;
+  --medium: #d49516;
+  --low: #1e9e68;
+  --info: #2580cc;
+
+  /* Charts */
+  --chart-1: #e8742a;
+  --chart-2: #d33824;
+  --chart-3: #d49516;
+  --chart-4: #1e9e68;
+  --chart-5: #2580cc;
 }
 
 .dark {
-  --background: oklch(0.145 0.012 45);
-  --foreground: oklch(0.945 0.012 70);
-  --card: oklch(0.185 0.014 45);
-  --card-foreground: oklch(0.945 0.012 70);
-  --popover: oklch(0.205 0.016 45);
-  --popover-foreground: oklch(0.945 0.012 70);
-  --primary: oklch(0.68 0.135 41);
-  --primary-foreground: oklch(0.16 0.04 41);
-  --secondary: oklch(0.245 0.016 45);
-  --secondary-foreground: oklch(0.93 0.02 70);
-  --muted: oklch(0.235 0.014 45);
-  --muted-foreground: oklch(0.66 0.02 60);
-  --accent: oklch(0.27 0.03 42);
-  --accent-foreground: oklch(0.93 0.04 55);
-  --destructive: oklch(0.62 0.21 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.275 0.015 45);
-  --input: oklch(0.265 0.015 45);
-  --ring: oklch(0.68 0.135 41);
-  --critical: oklch(0.62 0.22 25);
-  --high: oklch(0.66 0.17 45);
-  --medium: oklch(0.79 0.15 85);
-  --low: oklch(0.72 0.13 165);
-  --info: oklch(0.7 0.1 235);
+  /* Canvas — refined lighter shade of black (warm graphite) */
+  --background: #161514;
+  /* Primary text — soft bright warm white */
+  --foreground: #f3f0eb;
+  /* Card — elevated dark graphite surface */
+  --card: #1f1d1c;
+  --card-foreground: #f3f0eb;
+  /* Popover */
+  --popover: #262422;
+  --popover-foreground: #f3f0eb;
+  /* Primary — refined peach orange */
+  --primary: #e8742a;
+  --primary-foreground: #ffffff;
+  /* Secondary — subtle raised surface */
+  --secondary: #272523;
+  --secondary-foreground: #d6d3ce;
+  /* Muted */
+  --muted: #242220;
+  /* Muted text — clean #A7A7A7 grey for secondary details */
+  --muted-foreground: #a7a7a7;
+  /* Accent — hover state */
+  --accent: #2c2a27;
+  --accent-foreground: #f3f0eb;
+  /* Destructive */
+  --destructive: #d33824;
+  --destructive-foreground: #ffffff;
+  /* Border — restrained subtle boundary */
+  --border: #33302c;
+  --input: #292725;
+  --ring: #e8742a;
+  --accent-tint: rgba(232, 116, 42, 0.12);
+
+  --critical: #d33824;
+  --high: #e8742a;
+  --medium: #d49516;
+  --low: #1e9e68;
+  --info: #2580cc;
 }
 
 @layer base {
   * {
     border-color: var(--color-border);
     scrollbar-width: thin;
-    scrollbar-color: color-mix(in oklab, var(--color-primary) 30%, transparent) transparent;
+    scrollbar-color: color-mix(in oklab, var(--color-border) 70%, transparent) transparent;
   }
 
   html {
-    color-scheme: dark;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum";
   }
 
@@ -136,11 +166,11 @@
   }
 
   ::selection {
-    background: color-mix(in oklab, var(--color-primary) 40%, transparent);
+    background: color-mix(in oklab, var(--color-primary) 20%, transparent);
     color: var(--color-foreground);
   }
 
-  /* Custom subtle tactical scrollbar across webkit */
+  /* Scrollbar — subtle on light */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -149,7 +179,7 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: color-mix(in oklab, var(--color-border) 80%, transparent);
+    background: color-mix(in oklab, var(--color-border) 70%, transparent);
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
@@ -157,28 +187,28 @@
   }
 }
 
-/* Ambient deep vignette with subtle warm gradient depth */
+/* Warm canvas with soft peach ambient glow */
 @utility ambient-grid {
   background-color: var(--color-background);
   background-image:
-    radial-gradient(ellipse 90% 60% at 50% -10%, color-mix(in oklab, var(--color-primary) 12%, transparent), transparent 75%),
-    radial-gradient(circle 800px at 100% 100%, color-mix(in oklab, var(--color-primary) 5%, transparent), transparent 70%);
+    radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in oklab, var(--color-primary) 5%, transparent), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 85% 100%, color-mix(in oklab, var(--color-primary) 3%, transparent), transparent 60%);
   background-attachment: fixed;
 }
 
 @utility glow-primary {
-  box-shadow: 0 4px 24px -6px color-mix(in oklab, var(--color-primary) 45%, transparent);
+  box-shadow: 0 4px 20px -6px color-mix(in oklab, var(--color-primary) 30%, transparent);
 }
 
 @utility terminal-scroll {
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in oklab, var(--color-primary) 35%, transparent) transparent;
+  scrollbar-color: color-mix(in oklab, var(--color-primary) 25%, transparent) transparent;
   &::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   &::-webkit-scrollbar-thumb {
-    background: color-mix(in oklab, var(--color-primary) 30%, transparent);
+    background: color-mix(in oklab, var(--color-primary) 20%, transparent);
     border-radius: 999px;
   }
   &::-webkit-scrollbar-track {
@@ -199,3 +229,4 @@
     max-width: none !important;
   }
 }
+
