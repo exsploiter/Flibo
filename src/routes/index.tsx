@@ -119,13 +119,6 @@ function Dashboard() {
             Target perimeter inventory and vulnerability correlation.
           </p>
         </div>
-        <Link
-          to="/new-scan"
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          <Crosshair className="size-3.5" />
-          New scan
-        </Link>
       </div>
 
       {/* Single Compact Status Strip */}

@@ -106,7 +106,7 @@ const CVE_DATABASE: CveDefinition[] = [
     severity: "critical",
     description: "An unauthenticated or low-privilege attacker can execute arbitrary OS commands via the wsrep_provider variable when the database service port is exposed without network restrictions.",
     service: "MySQL / MariaDB",
-    version: "MariaDB < 10.5.9",
+    version: "< 10.5.9",
     references: [
       { label: "NVD Detail", url: "https://nvd.nist.gov/vuln/detail/CVE-2021-27928" },
       { label: "Exploit-DB", url: "https://www.exploit-db.com/exploits/49765" },
