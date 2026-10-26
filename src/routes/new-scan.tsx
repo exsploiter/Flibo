@@ -171,8 +171,8 @@ function NewScan() {
         <div className="space-y-4 lg:col-span-3">
           <section className="rounded-3xl border border-border/60 bg-card/60 p-5">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                Targets
+              <h2 className="text-sm font-semibold text-foreground">
+                Target Scope
               </h2>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={pasteFromClipboard}>
@@ -266,8 +266,8 @@ function NewScan() {
           </section>
 
           <section className="rounded-3xl border border-border/60 bg-card/60 p-5">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Agent lineup
+            <h2 className="text-sm font-semibold text-foreground">
+              Agent Pipeline Selection
             </h2>
             <div className="mt-3 space-y-2">
               {AGENTS.map((a) => {
@@ -286,7 +286,7 @@ function NewScan() {
                     </div>
                     <span
                       className={`ml-auto font-mono text-[10px] uppercase tracking-wider ${
-                        on ? "text-primary" : "text-muted-foreground/50"
+                        on ? "text-primary font-semibold" : "text-muted-foreground/50"
                       }`}
                     >
                       {on ? "armed" : "off"}
@@ -301,8 +301,8 @@ function NewScan() {
         {/* Config column */}
         <div className="space-y-4 lg:col-span-2">
           <section className="rounded-3xl border border-border/60 bg-card/60 p-5">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Saved profiles
+            <h2 className="text-sm font-semibold text-foreground">
+              Pre-configured Profiles
             </h2>
             <div className="mt-3 flex flex-wrap gap-2">
               {PROFILES.map((p) => (
@@ -318,8 +318,8 @@ function NewScan() {
           </section>
 
           <section className="rounded-3xl border border-border/60 bg-card/60 p-5">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Intensity
+            <h2 className="text-sm font-semibold text-foreground">
+              Scan Intensity
             </h2>
             <div className="mt-3 grid grid-cols-3 gap-2">
               {INTENSITY.map((i) => (

@@ -26,11 +26,12 @@ import {
   X,
 } from "lucide-react";
 import { useScan } from "@/lib/store";
+import { api } from "@/lib/api";
 import { AGENTS } from "@/lib/mock";
 import { ensureRunner, cancelScan, retryAgent, togglePause, etaSeconds } from "@/lib/runner";
 import { aggregateProgress, countBySeverity, riskScore, synthesizeVectors } from "@/lib/synthesis";
 import { copyText, download, scanToCsv, scanToJson, scanToMarkdown, safeFileName } from "@/lib/export";
-import { SEVERITY_ORDER, severityWeight, type Finding } from "@/lib/types";
+import { SEVERITY_ORDER, severityWeight, type Finding, type Scan } from "@/lib/types";
 import { AgentStatusDot, AGENT_STATUS_LABEL, EmptyState, ScanStatusPill, SeverityBadge } from "@/components/ui-bits";
 import { LogConsole } from "@/components/LogConsole";
 import { Button } from "@/components/ui/button";
@@ -137,7 +138,28 @@ function ScanDetail() {
   const { id } = Route.useParams();
   const mounted = useMounted();
   const navigate = useNavigate();
-  const scan = useScan(id);
+  const localScan = useScan(id);
+  const [remoteScan, setRemoteScan] = useState<Scan | null>(null);
+  const [isFetchingRemote, setIsFetchingRemote] = useState(false);
+  const [remoteFailed, setRemoteFailed] = useState(false);
+
+  useEffect(() => {
+    if (!localScan && mounted && !remoteFailed && !remoteScan) {
+      setIsFetchingRemote(true);
+      api
+        .getScan(id)
+        .then((s) => {
+          setRemoteScan(s);
+          setIsFetchingRemote(false);
+        })
+        .catch(() => {
+          setRemoteFailed(true);
+          setIsFetchingRemote(false);
+        });
+    }
+  }, [id, localScan, mounted, remoteFailed, remoteScan]);
+
+  const scan = localScan || remoteScan;
 
   const [tab, setTab] = useState<TabId>("summary");
   const [query, setQuery] = useState("");
@@ -152,7 +174,21 @@ function ScanDetail() {
   const vectors = useMemo(() => synthesizeVectors(scan?.findings ?? []), [scan?.findings]);
   const counts = useMemo(() => countBySeverity(scan?.findings ?? []), [scan?.findings]);
 
-  if (!mounted) return <div className="py-24 text-center text-muted-foreground">Loading scan…</div>;
+  if (!mounted || (isFetchingRemote && !scan)) {
+    return (
+      <div className="flex min-h-[55vh] flex-col items-center justify-center space-y-4">
+        <div className="relative flex size-14 items-center justify-center">
+          <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary/20" />
+          <Loader2 className="size-6 animate-spin text-primary" />
+        </div>
+        <div className="text-center">
+          <p className="font-mono text-xs uppercase tracking-widest text-primary">Synchronizing Target Telemetry</p>
+          <p className="mt-1 text-xs text-muted-foreground">Connecting to local engine worker pool…</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!scan) throw notFound();
 
   const agg = aggregateProgress(scan);
@@ -183,6 +219,15 @@ function ScanDetail() {
         ? (a.service ?? "").localeCompare(b.service ?? "") * sort.dir
         : ((a.port ?? 0) - (b.port ?? 0)) * sort.dir,
   );
+
+  const tabCounts: Partial<Record<TabId, number>> = {
+    ports: portFindings.length,
+    services: techFindings.length,
+    subdomains: subFindings.length,
+    cves: cveFindings.length,
+    vectors: vectors.length,
+    findings: allFindings.length,
+  };
 
   function toggleSort(key: "port" | "severity" | "service") {
     setSort((s) => (s.key === key ? { key, dir: s.dir === 1 ? -1 : 1 } : { key, dir: 1 }));
@@ -254,7 +299,17 @@ function ScanDetail() {
             </div>
             <h1 className="mt-2 truncate text-2xl font-bold tracking-tight">{scan.name}</h1>
             <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-xs text-muted-foreground">
-              <span className="rounded-md bg-muted/60 px-2 py-0.5">{scan.target}</span>
+              <button
+                onClick={() => {
+                  copyText(scan.target);
+                  toast.success(`Copied "${scan.target}"`);
+                }}
+                className="group/cp inline-flex items-center gap-1.5 rounded-md border border-border/50 bg-muted/60 px-2 py-0.5 text-foreground transition-colors hover:border-primary/50 hover:bg-muted"
+                title="Click to copy target host"
+              >
+                <span>{scan.target}</span>
+                <Copy className="size-3 text-muted-foreground transition-colors group-hover/cp:text-primary" />
+              </button>
               {scan.targets.slice(1).map((t) => (
                 <span key={t} className="rounded-md bg-muted/40 px-2 py-0.5">{t}</span>
               ))}
@@ -400,9 +455,14 @@ function ScanDetail() {
               <TabsTrigger
                 key={t.id}
                 value={t.id}
-                className="rounded-xl px-3 py-1.5 font-mono text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 font-mono text-xs transition-colors data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
-                {t.label}
+                <span>{t.label}</span>
+                {tabCounts[t.id] !== undefined && tabCounts[t.id]! > 0 && (
+                  <span className="rounded-md border border-border/40 bg-background/50 px-1.5 py-0.2 text-[10px] font-semibold tabular-nums text-muted-foreground group-data-[state=active]:border-transparent group-data-[state=active]:bg-primary-foreground/20 group-data-[state=active]:text-primary-foreground">
+                    {tabCounts[t.id]}
+                  </span>
+                )}
               </TabsTrigger>
             ))}
           </TabsList>

@@ -49,7 +49,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         <nav className="flex flex-1 flex-col gap-1 px-3">
-          <div className="px-3 pb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70">
+          <div className="px-3 pb-2 text-[11px] font-medium text-muted-foreground/75">
             Operations
           </div>
           {NAV.map((n) => (

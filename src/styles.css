@@ -11,7 +11,7 @@
 
 
 @theme {
-  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Sora", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
@@ -118,10 +118,13 @@
 @layer base {
   * {
     border-color: var(--color-border);
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--color-primary) 30%, transparent) transparent;
   }
 
   html {
     color-scheme: dark;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum";
   }
 
   body {
@@ -129,35 +132,50 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
   ::selection {
     background: color-mix(in oklab, var(--color-primary) 40%, transparent);
+    color: var(--color-foreground);
+  }
+
+  /* Custom subtle tactical scrollbar across webkit */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--color-border) 80%, transparent);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--color-primary) 40%, transparent);
   }
 }
 
-/* Ambient ember glow + faint grid, applied to the app shell */
+/* Ambient deep vignette with subtle warm gradient depth */
 @utility ambient-grid {
+  background-color: var(--color-background);
   background-image:
-    radial-gradient(ellipse 70% 45% at 50% -10%, color-mix(in oklab, var(--color-primary) 10%, transparent), transparent),
-    linear-gradient(color-mix(in oklab, var(--color-border) 22%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in oklab, var(--color-border) 22%, transparent) 1px, transparent 1px);
-  background-size:
-    100% 100%,
-    52px 52px,
-    52px 52px;
+    radial-gradient(ellipse 90% 60% at 50% -10%, color-mix(in oklab, var(--color-primary) 12%, transparent), transparent 75%),
+    radial-gradient(circle 800px at 100% 100%, color-mix(in oklab, var(--color-primary) 5%, transparent), transparent 70%);
+  background-attachment: fixed;
 }
 
 @utility glow-primary {
-  box-shadow: 0 0 28px -8px color-mix(in oklab, var(--color-primary) 55%, transparent);
+  box-shadow: 0 4px 24px -6px color-mix(in oklab, var(--color-primary) 45%, transparent);
 }
 
 @utility terminal-scroll {
   scrollbar-width: thin;
   scrollbar-color: color-mix(in oklab, var(--color-primary) 35%, transparent) transparent;
   &::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
   &::-webkit-scrollbar-thumb {
     background: color-mix(in oklab, var(--color-primary) 30%, transparent);
