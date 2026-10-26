@@ -15,10 +15,19 @@ export function synthesizeVectors(findings: Finding[]): AttackVector[] {
 
   for (const f of findings) {
     if (f.kind === "cve") {
+      const sName = (f.service ?? "").trim();
+      const vName = (f.version ?? "").trim();
+      const label =
+        sName && vName
+          ? vName.toLowerCase().startsWith(sName.toLowerCase())
+            ? vName
+            : `${sName} ${vName}`
+          : sName || vName || "service";
+
       vectors.push({
         id: `v-${f.id}`,
         severity: f.severity,
-        title: `${f.cveId} → ${f.service} ${f.version}`,
+        title: `${f.cveId} → ${label}`,
         why: `Exploitable service fingerprint matched. ${f.description?.slice(0, 90) ?? ""}`,
         confidence: Math.min(95, 60 + Math.round((f.cvss ?? 5) * 4)),
         findingId: f.id,

@@ -91,7 +91,7 @@ const CVE_DATABASE: CveDefinition[] = [
     severity: "critical",
     description: "Redis Debian/Ubuntu packages embed Lua library without disabling the package module, allowing an unauthenticated remote attacker with Redis command access to execute arbitrary commands.",
     service: "Redis",
-    version: "Redis 5.x / 6.x",
+    version: "5.x / 6.x",
     references: [
       { label: "NVD Detail", url: "https://nvd.nist.gov/vuln/detail/CVE-2022-0543" },
       { label: "PacketStorm Exploit", url: "https://packetstormsecurity.com/files/166885/Redis-Lua-Sandbox-Escape.html" },
