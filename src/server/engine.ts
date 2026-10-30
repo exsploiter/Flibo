@@ -6,6 +6,17 @@ import { runDnsScan } from "./scanner/dns";
 import { runHttpScan } from "./scanner/http";
 import { runCveScan } from "./scanner/cve";
 import { runOsScan } from "./scanner/os";
+import { runSslAudit } from "./scanner/ssl_deep";
+import { runWafCdnAudit } from "./scanner/waf_cdn";
+import { runContentDiscovery } from "./scanner/webcontent";
+import { runApiDiscovery } from "./scanner/api_discovery";
+import { runCloudRecon } from "./scanner/cloud_recon";
+import { runSubdomainTakeover } from "./scanner/takeover";
+import { runCmsFingerprint } from "./scanner/cms_fingerprint";
+import { runAuthSurfaceScan } from "./scanner/auth_surface";
+import { runOsintAudit } from "./scanner/osint";
+import { runNetworkOsScan } from "./scanner/os_network";
+import { generateAttackChainGraph } from "./scanner/synthesis";
 
 interface ActiveScanTask {
   scanId: string;
@@ -224,6 +235,60 @@ class ScanEngineManager extends EventEmitter {
             onLog: logHandler,
             shouldStop,
           });
+        } else if (agent.id === "ssl-deep") {
+          progressHandler(30);
+          const res = await runSslAudit(scan.target, logHandler);
+          newFindings = res.findings;
+          progressHandler(100);
+        } else if (agent.id === "waf-cdn") {
+          progressHandler(30);
+          const res = await runWafCdnAudit(scan.target, logHandler);
+          newFindings = res.findings;
+          progressHandler(100);
+        } else if (agent.id === "webcontent") {
+          progressHandler(25);
+          const res = await runContentDiscovery(scan.target, logHandler);
+          newFindings = res.findings;
+          progressHandler(100);
+        } else if (agent.id === "api-discovery") {
+          progressHandler(30);
+          const res = await runApiDiscovery(scan.target, logHandler);
+          newFindings = res.findings;
+          progressHandler(100);
+        } else if (agent.id === "cloud-recon") {
+          progressHandler(30);
+          const res = await runCloudRecon(scan.target, logHandler);
+          newFindings = res.findings;
+          progressHandler(100);
+        } else if (agent.id === "takeover-audit") {
+          progressHandler(25);
+          const currentScan = getScanById(task.scanId);
+          const subdomains = (currentScan?.findings || [])
+            .filter((f) => f.kind === "subdomain")
+            .map((f) => f.title.replace(/^Discovered Subdomain:\s*/i, "").trim());
+          const res = await runSubdomainTakeover([scan.target, ...subdomains], logHandler);
+          newFindings = res.findings;
+          progressHandler(100);
+        } else if (agent.id === "cms-fingerprint") {
+          progressHandler(30);
+          const res = await runCmsFingerprint(scan.target, logHandler);
+          newFindings = res.findings;
+          progressHandler(100);
+        } else if (agent.id === "auth-surface") {
+          progressHandler(30);
+          const res = await runAuthSurfaceScan(scan.target, logHandler);
+          newFindings = res.findings;
+          progressHandler(100);
+        } else if (agent.id === "osint-recon") {
+          progressHandler(30);
+          const res = await runOsintAudit(scan.target, logHandler);
+          newFindings = res.findings;
+          progressHandler(100);
+        } else if (agent.id === "os-network") {
+          progressHandler(30);
+          const res = await runNetworkOsScan(scan.target, logHandler);
+          newFindings = res.findings;
+          progressHandler(100);
         } else {
           // Unknown custom agent fallback
           logHandler(`[${agent.name}] Completed standard agent execution`);
@@ -262,23 +327,25 @@ class ScanEngineManager extends EventEmitter {
       });
 
       // Brief pacing between agents
-      await new Promise((r) => setTimeout(r, 300));
+      await new Promise((r) => setTimeout(r, 200));
     }
 
-    // Wrap up overall scan
+    // Wrap up overall scan and build attack graph
     if (!task.cancelled) {
       const finalScan = getScanById(task.scanId);
       if (finalScan) {
         const hasFailed = finalScan.agents.some((a) => a.status === "failed");
         const finalStatus = hasFailed ? "partial" : "complete";
+        const graph = generateAttackChainGraph(finalScan.target, finalScan.findings);
 
         updateScanById(task.scanId, (s) => ({
           ...s,
           status: finalStatus,
           finishedAt: Date.now(),
+          graph,
         }));
 
-        this.emitEvent(task.scanId, "scan_complete", { status: finalStatus });
+        this.emitEvent(task.scanId, "scan_complete", { status: finalStatus, graph });
       }
     }
   }

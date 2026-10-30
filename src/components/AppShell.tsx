@@ -16,9 +16,9 @@ function NavItem({ to, label, icon: Icon, active }: { to: string; label: string;
     <Link
       to={to}
       className={cn(
-        "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+        "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
         active
-          ? "bg-primary/12 text-primary"
+          ? "bg-primary/10 text-primary shadow-xs"
           : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
       )}
     >
@@ -36,7 +36,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="ambient-grid min-h-screen">
       {/* Sidebar */}
-      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border/60 bg-card/90 shadow-sm backdrop-blur-lg md:flex">
+      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border/50 bg-card/95 shadow-panel backdrop-blur-xl md:flex">
         <div className="flex items-center gap-3 px-5 py-6">
           <div className="glow-primary flex size-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
             <TerminalSquare className="size-5" strokeWidth={2.4} />
@@ -47,11 +47,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               recon · security ops
             </div>
           </div>
-
         </div>
 
         <nav className="flex flex-1 flex-col gap-1 px-3">
-          <div className="px-3 pb-2 text-[11px] font-medium text-muted-foreground/75">
+          <div className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">
             Operations
           </div>
           {NAV.map((n) => (
@@ -66,7 +65,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
 
         <div className="px-4 pb-5">
-          <div className="rounded-2xl border border-border/60 bg-muted/50 p-3">
+          <div className="rounded-2xl border border-border/50 bg-muted/30 p-3">
             <div className="flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
               <span className="relative flex size-2">
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-low opacity-60" />
@@ -84,7 +83,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Main column */}
       <div className="flex min-h-screen flex-col md:pl-60">
-        <header className="no-print sticky top-0 z-20 border-b border-border/60 bg-background/90 shadow-xs backdrop-blur-lg">
+        <header className="no-print sticky top-0 z-20 border-b border-border/40 bg-card/80 shadow-xs backdrop-blur-xl">
           <div className="mx-auto flex w-full max-w-[1440px] items-center gap-3 px-4 py-3 md:px-6">
             {/* Mobile brand */}
             <Link to="/" className="flex items-center gap-2 md:hidden">
@@ -113,20 +112,20 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
 
             <div className="ml-auto flex items-center gap-2">
-              <div className="hidden items-center gap-2 rounded-full border border-border/60 bg-muted/50 px-3 py-1.5 font-mono text-[11px] text-muted-foreground sm:flex">
+              <div className="hidden items-center gap-2 rounded-full border border-border/50 bg-muted/40 px-3 py-1.5 font-mono text-[11px] text-muted-foreground sm:flex">
                 <span className="size-1.5 rounded-full bg-low" />
                 opsec · passive mode
               </div>
               <button
                 onClick={toggle}
                 aria-label="Toggle theme"
-                className="flex size-9 items-center justify-center rounded-xl border border-border/60 bg-card text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                className="flex size-9 items-center justify-center rounded-xl border border-border/50 bg-card text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
                 {theme === "light" ? <Moon className="size-4" /> : <Sun className="size-4" />}
               </button>
               <Link
                 to="/new-scan"
-                className="glow-primary inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                className="glow-primary inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90"
               >
                 <Crosshair className="size-4" />
                 New scan
@@ -137,10 +136,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <main className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 md:px-6 md:py-8">{children}</main>
 
-        <footer className="no-print border-t border-border/40 px-6 py-4 font-mono text-[11px] text-muted-foreground/70">
-          Flibo — private recon automation console · personal use
+        <footer className="no-print border-t border-border/40 bg-card/30 px-6 py-4">
+          <div className="mx-auto flex max-w-[1440px] items-center justify-between font-mono text-[11px] text-muted-foreground/70">
+            <div>Flibo — private recon automation console · personal use</div>
+            <div>engine: v0.9.1 · opsec passive</div>
+          </div>
         </footer>
-
       </div>
     </div>
   );

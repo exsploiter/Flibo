@@ -10,11 +10,19 @@ export const AGENTS: AgentDef[] = [
   { id: "port-scan", name: "Port Scan", desc: "TCP/UDP port discovery with banner grab" },
   { id: "subdomain-enum", name: "Subdomain Enum", desc: "DNS bruteforce + passive sources" },
   { id: "tech-fingerprint", name: "Tech Fingerprint", desc: "HTTP probes, headers, JS fingerprints" },
-  { id: "cve-matcher", name: "CVE Matcher", desc: "Match fingerprints against CVE database" },
+  { id: "cve-matcher", name: "CVE Matcher", desc: "Match fingerprints against CVE/KEV database" },
   { id: "os-detection", name: "OS Detection", desc: "TCP/IP stack fingerprinting" },
+  { id: "ssl-deep", name: "Deep TLS/SSL", desc: "Certificate chain, ciphers & SAN extraction" },
+  { id: "waf-cdn", name: "WAF / CDN Edge", desc: "Edge shield fingerprinting & origin detection" },
+  { id: "webcontent", name: "Content Discovery", desc: "Exposed .env, .git, backups & admin paths" },
+  { id: "api-discovery", name: "API & GraphQL", desc: "OpenAPI/Swagger enumeration & introspection" },
+  { id: "cloud-recon", name: "Cloud & Storage", desc: "S3, GCS, Azure Blob exposure auditing" },
+  { id: "takeover-audit", name: "Subdomain Takeover", desc: "Dangling CNAME orphan service detection" },
+  { id: "cms-fingerprint", name: "CMS & Plugins", desc: "WordPress, Drupal, XML-RPC & plugin audit" },
+  { id: "auth-surface", name: "Auth Surface", desc: "Login portals, session flags & token audit" },
+  { id: "osint-recon", name: "Passive OSINT", desc: "RDAP registrar metadata & security.txt audit" },
+  { id: "os-network", name: "Network Routing", desc: "ASN ownership, routing & nmap provider" },
 ];
-
-// ---------- deterministic RNG per target ----------
 
 function hashStr(s: string): number {
   let h = 2166136261;
@@ -43,60 +51,95 @@ function pick<T>(rng: () => number, arr: T[], n: number): T[] {
   return out;
 }
 
-function isIpLike(target: string): boolean {
-  return /^\d/.test(target) || target.includes("/");
-}
-
-// ---------- live log generation ----------
-
 const LOG_POOLS: Record<string, string[]> = {
   "port-scan": [
-    "Starting Nmap 7.96 ( https://nmap.org )",
-    "Initiating Ping Scan against {t} (2 hosts)",
-    "Completed Ping Scan — 2.11s elapsed",
-    "Initiating SYN Stealth Scan against {t}",
+    "Starting raw TCP socket sweeps against {t}",
+    "Probing top ports 80, 443, 22, 8080...",
     "Discovered open port 443/tcp on {t}",
     "Discovered open port 22/tcp on {t}",
-    "SYN Stealth Scan Timing: about {p}% done",
-    "Initiating Service scan against 6 services on {t}",
-    "Completed SYN Stealth Scan at — 38.42s elapsed",
-    "Final report written: 6 hosts responded",
+    "Captured banner: SSH-2.0-OpenSSH_8.9p1",
+    "Port scan complete at {p}%",
   ],
   "subdomain-enum": [
-    "Loading wordlist: subdomains-top1-5000.txt",
-    "Wildcard detection: disabled (no wildcard on {t})",
-    "Resolving api.{t} … [203.0.113.17]",
-    "Resolving staging.{t} … [203.0.113.24]",
-    "Resolving vpn.{t} … NXDOMAIN",
-    "Found: admin.{t} [203.0.113.31]",
-    "Querying passive sources: crt.sh, hackertarget …",
-    "Merged results: 5 unique subdomains for {t}",
+    "Loading wordlist: subdomains-top1000.txt",
+    "Querying Certificate Transparency logs (crt.sh)...",
+    "Resolving api.{t} -> 203.0.113.17",
+    "Resolving staging.{t} -> 203.0.113.24",
+    "Found admin.{t} -> 203.0.113.31",
+    "Subdomain sweep complete",
   ],
   "tech-fingerprint": [
-    "Probing https://{t}/ (TLS 1.3, HTTP/2)",
-    "Header: server — nginx/1.24.0",
-    "Header: x-powered-by — Node.js",
-    "Match: nginx 1.24.0 (confidence 99%)",
-    "Fingerprinting client-side JS frameworks …",
-    "Match: React 18.2.0 (bundled vendor chunk)",
-    "Probing :8080 … service detected",
-    "Fingerprint set complete for {t}",
+    "Probing https://{t}/ (TLS 1.3)",
+    "Header: Server - nginx/1.24.0",
+    "Header: X-Powered-By - Node.js",
+    "Client framework detected: React 18.2",
+    "Technology fingerprinting complete",
   ],
   "cve-matcher": [
-    "Loading CVE database (snapshot 2026-06)",
-    "Matching fingerprints against CVE index …",
-    "Found CVE-2023-44487 (CVSS 7.5) → nginx/1.24.0",
-    "Found CVE-2024-22019 (CVSS 7.5) → Node.js 18.19.0",
-    "Found CVE-2023-38408 (CVSS 9.8) → OpenSSH 8.9p1",
-    "Cross-checking exploit availability (Exploit-DB) …",
-    "Correlation complete: 6 CVEs mapped for {t}",
+    "Loading local CVSS 3.1 & CISA KEV catalog...",
+    "Correlating banners against known exploits...",
+    "Found CVE-2023-44487 (CVSS 7.5) -> nginx Rapid Reset",
+    "Found CVE-2024-6387 (CVSS 8.1) -> OpenSSH RegreSSHion",
+    "CVE correlation complete",
   ],
   "os-detection": [
     "Initiating TCP/IP fingerprinting against {t}",
-    "Sending 10 probes (16 total ports)",
-    "OS guesses: Linux 5.x (98%), Linux 4.x (92%)",
-    "Distance: 11 hops (TTL 51 → guessed Linux)",
-    "Fingerprint locked: Linux 5.15 kernel series",
+    "TTL response: 64, Window size: 65535",
+    "Heuristic OS guess: Linux 5.15+ (96% confidence)",
+    "OS detection complete",
+  ],
+  "ssl-deep": [
+    "Performing deep TLS handshake on {t}:443...",
+    "Negotiated TLSv1.3 with AEAD cipher AES-256-GCM",
+    "Validating certificate chain and SAN entries...",
+    "Certificate valid for 180 days (Let's Encrypt Authority)",
+    "TLS audit complete",
+  ],
+  "waf-cdn": [
+    "Probing edge CDN & WAF signatures...",
+    "Analyzing Cloudflare Ray ID and response headers...",
+    "WAF shield detected: Cloudflare Edge Network",
+    "Edge detection complete",
+  ],
+  "webcontent": [
+    "Initiating sensitive path and backup file discovery...",
+    "Probing /.env, /.git/HEAD, /backup.sql...",
+    "Path scan complete, no soft-404 anomalies",
+  ],
+  "api-discovery": [
+    "Probing /openapi.json, /swagger.json, /graphql...",
+    "GraphQL introspection probe initiated...",
+    "API discovery sweep complete",
+  ],
+  "cloud-recon": [
+    "Generating predictable S3/GCS bucket permutations...",
+    "Probing storage endpoints for anonymous read ACLs...",
+    "Cloud storage audit complete",
+  ],
+  "takeover-audit": [
+    "Cross-referencing subdomains against dangling CNAME list...",
+    "Auditing GitHub Pages, Heroku, AWS S3 CNAMEs...",
+    "Subdomain takeover audit complete",
+  ],
+  "cms-fingerprint": [
+    "Probing CMS markers for WordPress, Drupal, Joomla...",
+    "Checking /wp-json/ and xmlrpc.php interface...",
+    "CMS audit complete",
+  ],
+  "auth-surface": [
+    "Evaluating Set-Cookie headers for Secure & HttpOnly...",
+    "Checking authentication endpoints /login and /oauth...",
+    "Auth surface mapping complete",
+  ],
+  "osint-recon": [
+    "Querying RDAP registration metadata for domain...",
+    "Probing RFC 9116 /.well-known/security.txt policy...",
+    "OSINT correlation complete",
+  ],
+  "os-network": [
+    "Querying Autonomous System (ASN) network ownership...",
+    "Validating nmap external engine binary status...",
+    "Network routing audit complete",
   ],
 };
 
@@ -109,215 +152,114 @@ export function logLineFor(agentId: string, target: string, progress: number): s
   return `[${ts}] ${text}`;
 }
 
-// ---------- finding generators (deterministic per target) ----------
-
 const PORT_POOL = [
   { port: 22, service: "ssh", banner: "OpenSSH 8.9p1 Ubuntu 3ubuntu0.4", severity: "low" as const },
-  { port: 80, service: "http", banner: "nginx 1.24.0", severity: "info" as const },
-  { port: 443, service: "https", banner: "nginx 1.24.0 (TLS 1.3)", severity: "info" as const },
-  { port: 3306, service: "mysql", banner: "MySQL 5.7.41-log", severity: "high" as const },
-  { port: 8080, service: "http-proxy", banner: "Node.js http server", severity: "medium" as const },
-  { port: 6379, service: "redis", banner: "Redis 6.0.16 (no auth)", severity: "high" as const },
-  { port: 5432, service: "postgresql", banner: "PostgreSQL 14.9", severity: "high" as const },
-  { port: 25, service: "smtp", banner: "Postfix smtpd", severity: "medium" as const },
+  { port: 80, service: "http", banner: "nginx/1.24.0", severity: "info" as const },
+  { port: 443, service: "https", banner: "nginx/1.24.0 (TLS 1.3)", severity: "info" as const },
+  { port: 3306, service: "mysql", banner: "MySQL 8.0.35-0ubuntu0.22.04.1", severity: "critical" as const },
+  { port: 6379, service: "redis", banner: "Redis server v=7.0.15", severity: "critical" as const },
+  { port: 8080, service: "http-proxy", banner: "Apache Tomcat/9.0.58", severity: "medium" as const },
 ];
 
-const SUBDOMAIN_POOL = ["api", "dev", "staging", "vpn", "mail", "cdn", "admin", "git", "status", "s3"];
+const SUBDOMAIN_POOL = ["api", "staging", "auth", "admin", "dev", "vpn", "cdn"];
 
-const TECH_POOL = [
-  { name: "nginx", version: "1.24.0", severity: "info" as const },
-  { name: "Node.js", version: "18.19.0", severity: "low" as const },
-  { name: "React", version: "18.2.0", severity: "info" as const },
-  { name: "MySQL", version: "5.7.41", severity: "medium" as const },
-  { name: "OpenSSH", version: "8.9p1", severity: "low" as const },
-  { name: "Redis", version: "6.0.16", severity: "medium" as const },
-  { name: "jQuery", version: "3.6.0", severity: "low" as const },
-  { name: "Ubuntu", version: "22.04 LTS", severity: "info" as const },
-];
+export function findingsFor(agentId: string, target: string): Finding[] {
+  const seed = hashStr(`${target}:${agentId}`);
+  const rng = mulberry32(seed);
+  const out: Finding[] = [];
 
-interface CveSeed {
-  id: string;
-  service: string;
-  version: string;
-  cvss: number;
-  severity: "critical" | "high" | "medium";
-  title: string;
-  description: string;
-}
-
-const CVE_POOL: CveSeed[] = [
-  {
-    id: "CVE-2023-38408",
-    service: "OpenSSH",
-    version: "8.9p1",
-    cvss: 9.8,
-    severity: "critical",
-    title: "OpenSSH agent forwarding remote code execution",
-    description:
-      "The OpenSSH agent (ssh-agent) permits loading a PKCS#11 library from an arbitrary path. Code execution in the agent is possible via forwarded agent sockets when signed libraries are loaded on the forwarding host.",
-  },
-  {
-    id: "CVE-2023-44487",
-    service: "nginx",
-    version: "1.24.0",
-    cvss: 7.5,
-    severity: "high",
-    title: "HTTP/2 Rapid Reset — denial of service",
-    description:
-      "HTTP/2 protocol-level flood where an attacker opens and immediately cancels a large number of streams, causing high CPU and memory amplification on the server.",
-  },
-  {
-    id: "CVE-2024-22019",
-    service: "Node.js",
-    version: "18.19.0",
-    cvss: 7.5,
-    severity: "high",
-    title: "Node.js HTTP chunk extension DoS",
-    description:
-      "A maliciously crafted HTTP request with an unbounded chunk extension can disable the Node.js HTTP server via resource exhaustion.",
-  },
-  {
-    id: "CVE-2023-21980",
-    service: "MySQL",
-    version: "5.7.41",
-    cvss: 7.1,
-    severity: "high",
-    title: "MySQL Server privilege escalation",
-    description:
-      "Vulnerability in the MySQL Server component allows a high-privileged attacker to escalate privileges via SQL and connection-level vectors.",
-  },
-  {
-    id: "CVE-2022-32213",
-    service: "Node.js",
-    version: "18.19.0",
-    cvss: 5.3,
-    severity: "medium",
-    title: "HTTP request smuggling — malformed chunked transfer encoding",
-    description:
-      "llhttp parser in Node.js accepts transfer-encoding headers with obfuscated framing, enabling HTTP request smuggling against downstream proxies.",
-  },
-  {
-    id: "CVE-2022-05402",
-    service: "Redis",
-    version: "6.0.16",
-    cvss: 10,
-    severity: "critical",
-    title: "Redis Lua sandbox escape (Debian packaging)",
-    description:
-      "Packaging issue allows a local or remote attacker with Lua eval access to escape the sandbox and execute arbitrary code on the host.",
-  },
-];
-
-let fidCounter = 100;
-
-function baseFinding(agent: string, kind: Finding["kind"], severity: Finding["severity"], title: string): Finding {
-  return {
-    id: `f${++fidCounter}`,
+  const baseFinding = (agent: string, kind: Finding["kind"], severity: Finding["severity"], title: string): Finding => ({
+    id: `f-${agent}-${Math.floor(rng() * 100000)}`,
     agent,
     kind,
     severity,
     title,
-    tags: [],
+    tags: [agent, kind],
     note: "",
-  };
-}
-
-export function findingsFor(agentId: string, target: string): Finding[] {
-  const rng = mulberry32(hashStr(target + "::" + agentId));
-  const out: Finding[] = [];
+    confidence: 90,
+  });
 
   if (agentId === "port-scan") {
-    const ports = pick(rng, PORT_POOL, 4 + Math.floor(rng() * 3));
+    const ports = pick(rng, PORT_POOL, 3 + Math.floor(rng() * 3));
     for (const p of ports) {
       out.push({
-        ...baseFinding("port-scan", "port", p.severity, `${p.service.toUpperCase()} on :${p.port}`),
+        ...baseFinding("port-scan", "port", p.severity, `Port ${p.port}/${p.service} open`),
         port: p.port,
         protocol: "tcp",
         service: p.service,
         banner: p.banner,
-        detail: `${target} — tcp/${p.port} open, banner: "${p.banner}"`,
+        detail: `Discovered open port with banner: ${p.banner}`,
       });
     }
   }
 
   if (agentId === "subdomain-enum") {
-    if (isIpLike(target)) return [];
-    const subs = pick(rng, SUBDOMAIN_POOL, 3 + Math.floor(rng() * 3));
+    const subs = pick(rng, SUBDOMAIN_POOL, 2 + Math.floor(rng() * 3));
     for (const s of subs) {
-      const admin = s === "admin";
+      const fqdn = `${s}.${target.replace(/^https?:\/\//, "")}`;
       out.push({
-        ...baseFinding(
-          "subdomain-enum",
-          "subdomain",
-          admin ? "medium" : "info",
-          `${s}.${target.replace(/^https?:\/\//, "")}`,
-        ),
-        detail: admin
-          ? "Admin panel reachable without additional ACL — review authentication surface."
-          : `Resolved to 203.0.113.${17 + Math.floor(rng() * 200)}`,
+        ...baseFinding("subdomain-enum", "subdomain", s === "admin" ? "medium" : "info", fqdn),
+        detail: `Resolved via DNS and Certificate Transparency logs`,
       });
     }
   }
 
-  if (agentId === "tech-fingerprint") {
-    const techs = pick(rng, TECH_POOL, 3 + Math.floor(rng() * 3));
-    for (const t of techs) {
-      out.push({
-        ...baseFinding("tech-fingerprint", "tech", t.severity, `${t.name} ${t.version}`),
-        service: t.name,
-        version: t.version,
-        detail: `Detected via HTTP header / payload fingerprint (confidence ${90 + Math.floor(rng() * 10)}%)`,
-      });
-    }
+  if (agentId === "ssl-deep") {
+    out.push({
+      ...baseFinding("ssl-deep", "tls", "info", "Valid TLS 1.3 Certificate (Let's Encrypt)"),
+      detail: "Certificate issued with RSA 2048 and SHA-256 signature. Expiry in 180 days.",
+    });
+  }
+
+  if (agentId === "waf-cdn") {
+    out.push({
+      ...baseFinding("waf-cdn", "waf", "info", "Edge Protection Active (Cloudflare)"),
+      detail: "Cloudflare proxy active fronting web traffic. DDoS mitigation engaged.",
+    });
+  }
+
+  if (agentId === "cloud-recon") {
+    out.push({
+      ...baseFinding("cloud-recon", "cloud", "info", "AWS Cloud Infrastructure"),
+      detail: "Target hosted in AWS us-east-1 region. S3 bucket permissions verified secure.",
+    });
+  }
+
+  if (agentId === "auth-surface") {
+    out.push({
+      ...baseFinding("auth-surface", "auth", "medium", "Missing HttpOnly on Analytics Cookie"),
+      detail: "Cookie issued without HttpOnly flag, readable by client-side JavaScript.",
+    });
+  }
+
+  if (agentId === "osint-recon") {
+    out.push({
+      ...baseFinding("osint-recon", "osint", "info", "RFC 9116 security.txt Present"),
+      detail: "Vulnerability disclosure contact established at /.well-known/security.txt.",
+    });
   }
 
   if (agentId === "cve-matcher") {
-    const cves = pick(rng, CVE_POOL, 3 + Math.floor(rng() * 3));
-    for (const c of cves) {
-      out.push({
-        ...baseFinding("cve-matcher", "cve", c.severity, `${c.id} — ${c.title}`),
-        cveId: c.id,
-        cvss: c.cvss,
-        severity: c.severity,
-        service: c.service,
-        version: c.version,
-        title: `${c.id} — ${c.title}`,
-        description: c.description,
-        references: [
-          { label: "NVD", url: `https://nvd.nist.gov/vuln/detail/${c.id}` },
-          { label: "MITRE", url: `https://cve.mitre.org/cgi-bin/cvename.cgi?name=${c.id}` },
-          { label: "Exploit-DB", url: `https://www.exploit-db.com/search?q=${c.id}` },
-        ],
-      });
-    }
-  }
-
-  if (agentId === "os-detection") {
-    const linux = rng() > 0.35;
     out.push({
-      ...baseFinding(
-        "os-detection",
-        "os",
-        "info",
-        linux ? "Linux 5.15 (kernel series)" : "Windows Server 2019",
-      ),
-      detail: linux
-        ? "TCP/IP fingerprint: TTL 51, window 64240 — Linux 5.x (98% confidence)"
-        : "TCP/IP fingerprint: TTL 128, window 65535 — Windows Server 2019 (95% confidence)",
+      ...baseFinding("cve-matcher", "cve", "high", "CVE-2024-6387 — OpenSSH RegreSSHion"),
+      cveId: "CVE-2024-6387",
+      cvss: 8.1,
+      cisaKev: true,
+      epss: 0.72,
+      mitreTechnique: "T1190 - Exploit Public-Facing Application",
+      description: "Signal handler race condition vulnerability in OpenSSH server allowing unauthenticated RCE.",
     });
   }
 
   return out;
 }
 
-// ---------- seeded scans ----------
-
 function seededAgents(
   target: string,
   states: { id: string; status: Scan["agents"][number]["status"]; progress?: number; error?: string; logs?: number }[],
 ): Scan["agents"] {
   return states.map((s) => {
-    const def = AGENTS.find((a) => a.id === s.id)!;
+    const def = AGENTS.find((a) => a.id === s.id) ?? { id: s.id, name: s.id, desc: "" };
     const logs: string[] = [];
     const n = s.logs ?? (s.status === "complete" ? 6 : s.status === "running" ? 4 : s.status === "failed" ? 3 : 0);
     for (let i = 0; i < n; i++) logs.push(logLineFor(s.id, target, ((i + 1) / n) * 100));
@@ -334,31 +276,28 @@ function seededAgents(
 
 export function seedScans(): Scan[] {
   const now = Date.now();
-
   const t1 = "acme-labs.dev";
+
   const scan1: Scan = {
     id: "scan-seed-1",
-    name: "Perimeter sweep — acme-labs.dev",
+    name: "Full perimeter sweep — acme-labs.dev",
     target: t1,
     targets: [t1, "203.0.113.17"],
-    tags: ["perimeter", "web"],
-    config: { intensity: "standard", agents: AGENTS.map((a) => a.id), ports: "top-1000", stealth: false, scheduled: null },
+    tags: ["perimeter", "v2-recon"],
+    config: { intensity: "deep", agents: AGENTS.map((a) => a.id), ports: "top-1000", stealth: false, scheduled: null },
     status: "complete",
     createdAt: now - 1000 * 60 * 60 * 26,
     finishedAt: now - 1000 * 60 * 60 * 26 + 1000 * 60 * 8,
-    agents: seededAgents(t1, [
-      { id: "port-scan", status: "complete" },
-      { id: "subdomain-enum", status: "complete" },
-      { id: "tech-fingerprint", status: "complete" },
-      { id: "cve-matcher", status: "complete" },
-      { id: "os-detection", status: "complete" },
-    ]),
+    agents: seededAgents(t1, AGENTS.map((a) => ({ id: a.id, status: "complete" as const }))),
     findings: [
       ...findingsFor("port-scan", t1),
       ...findingsFor("subdomain-enum", t1),
-      ...findingsFor("tech-fingerprint", t1),
       ...findingsFor("cve-matcher", t1),
-      ...findingsFor("os-detection", t1),
+      ...findingsFor("ssl-deep", t1),
+      ...findingsFor("waf-cdn", t1),
+      ...findingsFor("cloud-recon", t1),
+      ...findingsFor("auth-surface", t1),
+      ...findingsFor("osint-recon", t1),
     ],
   };
 
@@ -377,44 +316,8 @@ export function seedScans(): Scan[] {
       { id: "port-scan", status: "complete" },
       { id: "os-detection", status: "complete" },
     ]),
-    findings: [...findingsFor("port-scan", t2), ...findingsFor("os-detection", t2)],
+    findings: [...findingsFor("port-scan", t2)],
   };
 
-  const t3 = "203.0.113.42";
-  const scan3: Scan = {
-    id: "scan-seed-3",
-    name: "Edge recon — 203.0.113.42",
-    target: t3,
-    targets: [t3],
-    tags: ["edge", "opsec"],
-    config: { intensity: "deep", agents: AGENTS.map((a) => a.id), ports: "1-65535", stealth: true, scheduled: null },
-    status: "running",
-    createdAt: now - 1000 * 60 * 6,
-    agents: seededAgents(t3, [
-      { id: "subdomain-enum", status: "complete" },
-      { id: "port-scan", status: "complete" },
-      { id: "cve-matcher", status: "running", progress: 42 },
-      { id: "tech-fingerprint", status: "queued" },
-      { id: "os-detection", status: "failed", error: "Timed out after 300s — host filtered TCP probes" },
-    ]),
-    findings: [...findingsFor("port-scan", t3), ...findingsFor("subdomain-enum", t3)],
-  };
-
-  const scan4: Scan = {
-    id: "scan-seed-4",
-    name: "Legacy host check — oldcorp.internal",
-    target: "legacy.oldcorp.internal",
-    targets: ["legacy.oldcorp.internal"],
-    tags: ["legacy"],
-    config: { intensity: "standard", agents: ["port-scan", "cve-matcher"], ports: "top-100", stealth: false, scheduled: null },
-    status: "cancelled",
-    createdAt: now - 1000 * 60 * 60 * 72,
-    agents: seededAgents("legacy.oldcorp.internal", [
-      { id: "port-scan", status: "complete", logs: 3 },
-      { id: "cve-matcher", status: "queued" },
-    ]),
-    findings: [...findingsFor("port-scan", "legacy.oldcorp.internal")],
-  };
-
-  return [scan3, scan1, scan2, scan4];
+  return [scan1, scan2];
 }

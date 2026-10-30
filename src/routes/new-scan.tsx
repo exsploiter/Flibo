@@ -58,8 +58,9 @@ const INTENSITY = [
 
 const PROFILES = [
   { id: "quick-sweep", label: "Quick Sweep", agents: ["port-scan", "os-detection"], intensity: "quick" as const, ports: "top-100", stealth: false },
-  { id: "full-audit", label: "Full Audit", agents: AGENTS.map((a) => a.id), intensity: "standard" as const, ports: "top-1000", stealth: false },
-  { id: "stealth-web", label: "Stealth Web", agents: ["port-scan", "tech-fingerprint", "cve-matcher"], intensity: "standard" as const, ports: "top-1000", stealth: true },
+  { id: "full-audit", label: "Full V2 Spectrum", agents: AGENTS.map((a) => a.id), intensity: "standard" as const, ports: "top-1000", stealth: false },
+  { id: "cloud-takeover", label: "Cloud & Takeover", agents: ["subdomain-enum", "takeover-audit", "cloud-recon", "osint-recon"], intensity: "quick" as const, ports: "top-100", stealth: true },
+  { id: "web-threat", label: "Web Threat Model", agents: ["port-scan", "waf-cdn", "ssl-deep", "webcontent", "api-discovery", "cms-fingerprint", "auth-surface", "cve-matcher"], intensity: "standard" as const, ports: "top-1000", stealth: false },
 ];
 
 function NewScan() {
@@ -169,7 +170,7 @@ function NewScan() {
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Targets column */}
         <div className="space-y-4 lg:col-span-3">
-          <section className="rounded-3xl border border-border/60 bg-card p-5">
+          <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-panel">
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-sm font-semibold text-foreground">
                 Target Scope
@@ -300,7 +301,7 @@ function NewScan() {
 
         {/* Config column */}
         <div className="space-y-4 lg:col-span-2">
-          <section className="rounded-3xl border border-border/60 bg-card p-5">
+          <section className="rounded-3xl border border-border/50 bg-card p-5 shadow-panel">
             <h2 className="text-sm font-semibold text-foreground">
               Pre-configured Profiles
             </h2>
@@ -309,7 +310,7 @@ function NewScan() {
                 <button
                   key={p.id}
                   onClick={() => applyProfile(p.id)}
-                  className="rounded-xl border border-border/60 bg-background/60 px-3 py-1.5 text-xs font-medium transition-colors hover:border-primary/40 hover:text-primary"
+                  className="rounded-xl border border-border/60 bg-muted/30 px-3 py-1.5 text-xs font-semibold text-foreground transition-all hover:border-primary/40 hover:bg-secondary hover:text-primary"
                 >
                   {p.label}
                 </button>
@@ -317,7 +318,7 @@ function NewScan() {
             </div>
           </section>
 
-          <section className="rounded-3xl border border-border/60 bg-card p-5">
+          <section className="rounded-3xl border border-border/50 bg-card p-5 shadow-panel">
             <h2 className="text-sm font-semibold text-foreground">
               Scan Intensity
             </h2>

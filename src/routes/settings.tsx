@@ -124,6 +124,55 @@ function SettingsPage() {
             />
           </div>
         )}
+        <div>
+          <Label className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+            Outbound Webhook URL (Slack / Discord / Custom)
+          </Label>
+          <Input
+            value={s.webhookUrl || ""}
+            onChange={(e) => set("webhookUrl", e.target.value)}
+            placeholder="https://hooks.slack.com/services/..."
+            className="mt-1.5 rounded-xl border-border/60 bg-background/70 font-mono text-xs"
+          />
+        </div>
+      </Card>
+
+      <Card icon={SlidersHorizontal} title="Engagement & report branding">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div>
+            <Label className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+              Operator name
+            </Label>
+            <Input
+              value={s.operatorName || ""}
+              onChange={(e) => set("operatorName", e.target.value)}
+              placeholder="Lead Analyst"
+              className="mt-1.5 rounded-xl border-border/60 bg-background/70 font-mono text-xs"
+            />
+          </div>
+          <div>
+            <Label className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+              Target client / entity
+            </Label>
+            <Input
+              value={s.clientName || ""}
+              onChange={(e) => set("clientName", e.target.value)}
+              placeholder="Acme Corp"
+              className="mt-1.5 rounded-xl border-border/60 bg-background/70 font-mono text-xs"
+            />
+          </div>
+          <div>
+            <Label className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+              Engagement name
+            </Label>
+            <Input
+              value={s.engagementName || ""}
+              onChange={(e) => set("engagementName", e.target.value)}
+              placeholder="Q4 Red Team Sweep"
+              className="mt-1.5 rounded-xl border-border/60 bg-background/70 font-mono text-xs"
+            />
+          </div>
+        </div>
       </Card>
 
       <Card icon={SlidersHorizontal} title="Scan defaults">

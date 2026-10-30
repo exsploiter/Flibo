@@ -160,8 +160,12 @@ export interface AppSettings {
   notifyInApp: boolean;
   notifyEmail: boolean;
   notifyEmailTo: string;
+  webhookUrl?: string;
   defaultProfile: string;
   retentionDays: string;
+  operatorName?: string;
+  clientName?: string;
+  engagementName?: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -170,8 +174,12 @@ export const DEFAULT_SETTINGS: AppSettings = {
   notifyInApp: true,
   notifyEmail: false,
   notifyEmailTo: "",
+  webhookUrl: "",
   defaultProfile: "standard",
   retentionDays: "90",
+  operatorName: "",
+  clientName: "",
+  engagementName: "",
 };
 
 export function loadSettings(): AppSettings {

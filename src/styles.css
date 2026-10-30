@@ -5,14 +5,12 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Flibo design system — peach orange & light grey.
- * Warm, airy canvas with soft peach accent. Light-first.
- * All colors are oklch semantic tokens. Components must never hardcode colors.
+ * Flibo design system — Claude-inspired Warm Terracotta & Ivory theme.
+ * Warm parchment light mode and deep roasted charcoal dark mode with signature terracotta accent (#D97757).
  */
 
-
 @theme {
-  --font-sans: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
@@ -57,93 +55,83 @@
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 1rem;
 
-  /* Canvas — light warm grey from user swatch */
-  --background: #f1f0ed;
-  /* Primary text — deep graphite */
-  --foreground: #1a1918;
-  /* Card — clean surface */
-  --card: #ffffff;
-  --card-foreground: #1a1918;
+  /* Claude Light Palette — Warm ivory/parchment canvas */
+  --background: #FAF8F5;
+  /* Primary text — warm deep espresso ink */
+  --foreground: #23211E;
+  /* Card — clean crisp warm white surface */
+  --card: #FFFFFF;
+  --card-foreground: #23211E;
   /* Popover */
-  --popover: #ffffff;
-  --popover-foreground: #1a1918;
-  /* Primary — peach orange */
-  --primary: #e8742a;
-  --primary-foreground: #ffffff;
-  /* Secondary — subtle warm grey */
-  --secondary: #e6e4df;
-  --secondary-foreground: #2d2c2a;
-  /* Muted */
-  --muted: #e8e6e1;
-  --muted-foreground: #6c6962;
-  /* Accent — hover surface */
-  --accent: #e4e2dd;
-  --accent-foreground: #1a1918;
-  /* Destructive */
-  --destructive: #d33824;
-  --destructive-foreground: #ffffff;
-  /* Border — refined warm grey */
-  --border: #d4d1cb;
-  --input: #dcd9d3;
-  --ring: #e8742a;
-  /* Peach tint for subtle backgrounds */
-  --accent-tint: rgba(232, 116, 42, 0.10);
+  --popover: #FFFFFF;
+  --popover-foreground: #23211E;
+  /* Primary — Claude's signature terracotta / burnt copper */
+  --primary: #D97757;
+  --primary-foreground: #FFFFFF;
+  /* Secondary — subtle warm biscuit/parchment tint */
+  --secondary: #F3EFE9;
+  --secondary-foreground: #C15F3C;
+  /* Muted — soft stone fill */
+  --muted: #F4EFEA;
+  --muted-foreground: #7A7369;
+  /* Accent — warm hover state */
+  --accent: #F5EEE6;
+  --accent-foreground: #B85332;
+  /* Destructive — warm crimson */
+  --destructive: #D94848;
+  --destructive-foreground: #FFFFFF;
+  /* Border — warm biscuit/sand line */
+  --border: #E8E2D9;
+  --input: #E5DFD5;
+  --ring: #D97757;
+  /* Warm terracotta tint for badges and highlights */
+  --accent-tint: rgba(217, 119, 87, 0.09);
 
-  /* Severity — reserved for severity only */
-  --critical: #d33824;
-  --high: #e8742a;
-  --medium: #d49516;
-  --low: #1e9e68;
-  --info: #2580cc;
+  /* Status Colors (refined, editorial security tones) */
+  --critical: #D94848;
+  --high: #E06D28;
+  --medium: #D99B26;
+  --low: #368A65;
+  --info: #D97757;
 
   /* Charts */
-  --chart-1: #e8742a;
-  --chart-2: #d33824;
-  --chart-3: #d49516;
-  --chart-4: #1e9e68;
-  --chart-5: #2580cc;
+  --chart-1: #D97757;
+  --chart-2: #E06D28;
+  --chart-3: #4A88A9;
+  --chart-4: #368A65;
+  --chart-5: #8C73B8;
 }
 
 .dark {
-  /* Canvas — refined lighter shade of black (warm graphite) */
-  --background: #161514;
-  /* Primary text — soft bright warm white */
-  --foreground: #f3f0eb;
-  /* Card — elevated dark graphite surface */
-  --card: #1f1d1c;
-  --card-foreground: #f3f0eb;
-  /* Popover */
-  --popover: #262422;
-  --popover-foreground: #f3f0eb;
-  /* Primary — refined peach orange */
-  --primary: #e8742a;
-  --primary-foreground: #ffffff;
-  /* Secondary — subtle raised surface */
-  --secondary: #272523;
-  --secondary-foreground: #d6d3ce;
-  /* Muted */
-  --muted: #242220;
-  /* Muted text — clean #A7A7A7 grey for secondary details */
-  --muted-foreground: #a7a7a7;
-  /* Accent — hover state */
-  --accent: #2c2a27;
-  --accent-foreground: #f3f0eb;
-  /* Destructive */
-  --destructive: #d33824;
-  --destructive-foreground: #ffffff;
-  /* Border — restrained subtle boundary */
-  --border: #33302c;
-  --input: #292725;
-  --ring: #e8742a;
-  --accent-tint: rgba(232, 116, 42, 0.12);
+  /* Claude Dark Palette — Deep warm roasted charcoal & glowing terracotta */
+  --background: #1C1B18;
+  --foreground: #F4F0EA;
+  --card: #262421;
+  --card-foreground: #F4F0EA;
+  --popover: #2A2825;
+  --popover-foreground: #F4F0EA;
+  --primary: #D97757;
+  --primary-foreground: #FFFFFF;
+  --secondary: #2E2B27;
+  --secondary-foreground: #E58D70;
+  --muted: #2A2723;
+  --muted-foreground: #A19A8E;
+  --accent: #332F2A;
+  --accent-foreground: #F4F0EA;
+  --destructive: #E05A5A;
+  --destructive-foreground: #FFFFFF;
+  --border: #3A3630;
+  --input: #332F2A;
+  --ring: #D97757;
+  --accent-tint: rgba(217, 119, 87, 0.16);
 
-  --critical: #d33824;
-  --high: #e8742a;
-  --medium: #d49516;
-  --low: #1e9e68;
-  --info: #2580cc;
+  --critical: #EF5350;
+  --high: #F08C4A;
+  --medium: #E5B558;
+  --low: #48BB78;
+  --info: #D97757;
 }
 
 @layer base {
@@ -166,11 +154,10 @@
   }
 
   ::selection {
-    background: color-mix(in oklab, var(--color-primary) 20%, transparent);
+    background: color-mix(in oklab, var(--color-primary) 22%, transparent);
     color: var(--color-foreground);
   }
 
-  /* Scrollbar — subtle on light */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -187,17 +174,27 @@
   }
 }
 
-/* Warm canvas with soft peach ambient glow */
+/* Claude warm ambient glow */
 @utility ambient-grid {
   background-color: var(--color-background);
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in oklab, var(--color-primary) 5%, transparent), transparent 70%),
-    radial-gradient(ellipse 60% 40% at 85% 100%, color-mix(in oklab, var(--color-primary) 3%, transparent), transparent 60%);
+    radial-gradient(ellipse 90% 60% at 80% -5%, rgba(217, 119, 87, 0.07), transparent 70%),
+    radial-gradient(ellipse 70% 50% at -5% 105%, rgba(217, 119, 87, 0.05), transparent 60%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4), transparent 100%);
   background-attachment: fixed;
 }
 
+/* Warm elevated panel shadows */
+@utility shadow-panel {
+  box-shadow: 0 10px 30px -5px rgba(35, 33, 30, 0.04), 0 2px 6px -1px rgba(35, 33, 30, 0.02);
+}
+
+@utility shadow-panel-lg {
+  box-shadow: 0 18px 45px -8px rgba(217, 119, 87, 0.08), 0 4px 12px -2px rgba(35, 33, 30, 0.03);
+}
+
 @utility glow-primary {
-  box-shadow: 0 4px 20px -6px color-mix(in oklab, var(--color-primary) 30%, transparent);
+  box-shadow: 0 6px 20px -3px rgba(217, 119, 87, 0.38);
 }
 
 @utility terminal-scroll {
@@ -229,4 +226,3 @@
     max-width: none !important;
   }
 }
-

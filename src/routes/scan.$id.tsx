@@ -24,13 +24,17 @@ import {
   Tag,
   Terminal,
   X,
+  Network,
+  GitFork,
+  Briefcase,
+  ShieldAlert,
 } from "lucide-react";
 import { useScan } from "@/lib/store";
 import { api } from "@/lib/api";
 import { AGENTS } from "@/lib/mock";
 import { ensureRunner, cancelScan, retryAgent, togglePause, etaSeconds } from "@/lib/runner";
-import { aggregateProgress, countBySeverity, riskScore, synthesizeVectors } from "@/lib/synthesis";
-import { copyText, download, scanToCsv, scanToJson, scanToMarkdown, safeFileName } from "@/lib/export";
+import { aggregateProgress, countBySeverity, riskScore, synthesizeVectors, generateAttackChainGraph } from "@/lib/synthesis";
+import { copyText, download, scanToCsv, scanToJson, scanToMarkdown, scanToExecutiveSummary, scanToTicketing, safeFileName } from "@/lib/export";
 import { SEVERITY_ORDER, severityWeight, type Finding, type Scan } from "@/lib/types";
 import { AgentStatusDot, AGENT_STATUS_LABEL, EmptyState, ScanStatusPill, SeverityBadge } from "@/components/ui-bits";
 import { LogConsole } from "@/components/LogConsole";
@@ -63,6 +67,8 @@ export const Route = createFileRoute("/scan/$id")({
 
 const TABS = [
   { id: "summary", label: "Summary" },
+  { id: "graph", label: "Attack Graph" },
+  { id: "topology", label: "Topology" },
   { id: "ports", label: "Ports" },
   { id: "services", label: "Services" },
   { id: "subdomains", label: "Subdomains" },
@@ -283,7 +289,7 @@ function ScanDetail() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="rounded-3xl border border-border/60 bg-card p-5">
+      <div className="rounded-3xl border border-border/50 bg-card p-6 shadow-panel">
         <div className="flex flex-wrap items-start gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -379,11 +385,19 @@ function ScanDetail() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    download(`${safeFileName(scan)}.md`, scanToMarkdown(scan), "text/markdown");
-                    toast.success("Exported Markdown");
+                    download(`${safeFileName(scan)}_executive.md`, scanToExecutiveSummary(scan), "text/markdown");
+                    toast.success("Exported Executive Briefing");
                   }}
                 >
-                  <FileText className="size-4" /> Markdown
+                  <Briefcase className="size-4" /> Executive Briefing
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    download(`${safeFileName(scan)}_tickets.txt`, scanToTicketing(scan), "text/plain");
+                    toast.success("Exported Ticketing Format");
+                  }}
+                >
+                  <ShieldAlert className="size-4" /> Jira / GitHub Tickets
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => window.print()}>
                   <Printer className="size-4" /> PDF / print view
@@ -529,6 +543,138 @@ function ScanDetail() {
                     </div>
                   ))}
                   {vectors.length === 0 && <p className="text-sm text-muted-foreground">No vectors mapped yet.</p>}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {tab === "graph" && (
+            <div className="space-y-6">
+              <div className="rounded-3xl border border-border/60 bg-card p-6">
+                <div className="flex items-center justify-between pb-4 border-b border-border/40">
+                  <div>
+                    <h3 className="font-semibold text-base flex items-center gap-2">
+                      <GitFork className="size-4 text-primary" /> Multi-Hop Attack Path Graph
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Synthesized directed attack chain from target perimeter to correlated vulnerabilities.
+                    </p>
+                  </div>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {scan.findings.length} findings mapped
+                  </span>
+                </div>
+
+                <div className="mt-6 flex flex-col md:flex-row items-stretch gap-6 overflow-x-auto pb-4">
+                  {/* Root Target Node */}
+                  <div className="flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-primary/40 bg-primary/5 min-w-[200px]">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-primary font-semibold">Origin Target</span>
+                    <span className="font-mono text-sm font-bold mt-1 text-center truncate max-w-[180px]">{scan.target}</span>
+                    <span className="mt-2 text-[11px] rounded-lg bg-card px-2 py-0.5 border border-border/50 text-muted-foreground">Scanned Asset</span>
+                  </div>
+
+                  <div className="hidden md:flex items-center text-muted-foreground/40 font-mono text-xl">➔</div>
+
+                  {/* Surface Level: Ports & Services */}
+                  <div className="flex flex-col gap-3 min-w-[240px]">
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">1. Discovered Perimeters</span>
+                    {scan.findings.filter((f) => f.kind === "port" || f.kind === "subdomain").slice(0, 5).map((p) => (
+                      <div key={p.id} className="p-3 rounded-xl border border-border/60 bg-muted/30">
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono text-xs font-semibold">{p.kind === "port" ? `Port ${p.port}/${p.service}` : p.title}</span>
+                          <SeverityBadge severity={p.severity} />
+                        </div>
+                        <span className="text-[11px] text-muted-foreground truncate block mt-1">{p.detail || p.banner || "Reachable endpoint"}</span>
+                      </div>
+                    ))}
+                    {scan.findings.filter((f) => f.kind === "port" || f.kind === "subdomain").length === 0 && (
+                      <p className="text-xs text-muted-foreground">No open perimeters identified.</p>
+                    )}
+                  </div>
+
+                  <div className="hidden md:flex items-center text-muted-foreground/40 font-mono text-xl">➔</div>
+
+                  {/* Weaponized Vector Level: CVEs, Leaks, Takeovers */}
+                  <div className="flex flex-col gap-3 flex-1 min-w-[280px]">
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">2. Correlated Exploits & Pivots</span>
+                    {scan.findings.filter((f) => ["cve", "takeover", "cloud", "content", "auth"].includes(f.kind)).slice(0, 5).map((v) => (
+                      <div key={v.id} className="p-3 rounded-xl border border-border/70 bg-card shadow-xs">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-mono text-xs font-bold text-primary truncate">{v.title}</span>
+                          <SeverityBadge severity={v.severity} />
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{v.detail || v.description || v.note}</p>
+                        {v.mitreTechnique && (
+                          <div className="mt-2 font-mono text-[10px] text-muted-foreground/80 flex items-center gap-1.5">
+                            <span className="font-semibold text-primary">MITRE:</span> {v.mitreTechnique}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {scan.findings.filter((f) => ["cve", "takeover", "cloud", "content", "auth"].includes(f.kind)).length === 0 && (
+                      <div className="rounded-xl border border-border/50 bg-muted/20 p-4 text-center">
+                        <p className="text-xs text-muted-foreground">No multi-hop exploit paths discovered.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {tab === "topology" && (
+            <div className="space-y-6">
+              <div className="rounded-3xl border border-border/60 bg-card p-6">
+                <div className="flex items-center justify-between pb-4 border-b border-border/40">
+                  <div>
+                    <h3 className="font-semibold text-base flex items-center gap-2">
+                      <Network className="size-4 text-primary" /> Discovered Network & Asset Topology
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Perimeter map of resolved hosts, listening socket daemons, and edge security posture.
+                    </p>
+                  </div>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {scan.targets.length} targets · {scan.findings.filter((f) => f.kind === "port").length} open ports
+                  </span>
+                </div>
+
+                <div className="mt-6 grid gap-4 md:grid-cols-2">
+                  <div className="rounded-2xl border border-border/50 bg-muted/20 p-5 space-y-3">
+                    <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Target Host Perimeters</span>
+                    {scan.targets.map((tgt, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-card border border-border/50">
+                        <div className="flex items-center gap-2.5">
+                          <span className="size-2 rounded-full bg-low" />
+                          <span className="font-mono text-sm font-semibold">{tgt}</span>
+                        </div>
+                        <span className="font-mono text-[11px] text-muted-foreground">Host Root</span>
+                      </div>
+                    ))}
+                    {scan.findings.filter((f) => f.kind === "subdomain").map((s) => (
+                      <div key={s.id} className="flex items-center justify-between p-2.5 rounded-xl bg-card/60 border border-border/40 text-xs">
+                        <span className="font-mono text-muted-foreground">{s.title}</span>
+                        <span className="font-mono text-[10px] text-low">active</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="rounded-2xl border border-border/50 bg-muted/20 p-5 space-y-3">
+                    <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Listening Daemon Sockets</span>
+                    {scan.findings.filter((f) => f.kind === "port").map((p) => (
+                      <div key={p.id} className="flex items-center justify-between p-3 rounded-xl bg-card border border-border/50">
+                        <div>
+                          <span className="font-mono text-sm font-bold text-foreground">:{p.port}</span>
+                          <span className="ml-2 font-mono text-xs text-muted-foreground uppercase">{p.service || "tcp"}</span>
+                          {p.banner && <p className="font-mono text-[11px] text-muted-foreground/80 truncate max-w-[240px] mt-0.5">{p.banner}</p>}
+                        </div>
+                        <SeverityBadge severity={p.severity} />
+                      </div>
+                    ))}
+                    {scan.findings.filter((f) => f.kind === "port").length === 0 && (
+                      <p className="text-xs text-muted-foreground py-4 text-center">No open listening sockets detected.</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
