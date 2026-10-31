@@ -38,8 +38,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border/50 bg-card/95 shadow-panel backdrop-blur-xl md:flex">
         <div className="flex items-center gap-3 px-5 py-6">
-          <div className="glow-primary flex size-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-            <TerminalSquare className="size-5" strokeWidth={2.4} />
+          <div className="glow-primary flex size-10 items-center justify-center rounded-2xl bg-primary text-xl select-none leading-none shadow-sm">
+            <span role="img" aria-label="Joker">🃏</span>
           </div>
           <div>
             <div className="font-mono text-lg font-bold tracking-tight leading-none">FLIBO</div>
@@ -87,8 +87,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="mx-auto flex w-full max-w-[1440px] items-center gap-3 px-4 py-3 md:px-6">
             {/* Mobile brand */}
             <Link to="/" className="flex items-center gap-2 md:hidden">
-              <div className="flex size-8 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <TerminalSquare className="size-4" />
+              <div className="flex size-8 items-center justify-center rounded-xl bg-primary text-base select-none leading-none shadow-sm">
+                <span role="img" aria-label="Joker">🃏</span>
               </div>
               <span className="font-mono text-sm font-bold">FLIBO</span>
             </Link>
