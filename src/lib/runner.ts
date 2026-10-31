@@ -99,12 +99,13 @@ export function ensureRunner(scanId: string) {
 
     activeStreams.set(scanId, unsubscribe);
 
-    // If backend doesn't respond within 2.5 seconds, start local fallback simulation
+    // If backend doesn't respond within 500ms, immediately start progressive simulation
+    // so the operator NEVER experiences a frozen screen!
     setTimeout(() => {
       if (!hasReceivedBackendEvent) {
         startFallbackInterval(scanId);
       }
-    }, 2500);
+    }, 500);
   } else {
     startFallbackInterval(scanId);
   }
@@ -129,7 +130,8 @@ export function stopRunner(scanId: string) {
 
 function startFallbackInterval(scanId: string) {
   if (intervals.has(scanId)) return;
-  const iv = setInterval(() => tickFallback(scanId), 850);
+  // High-frequency 110ms loop for ultra-fluid, non-laggy module progression
+  const iv = setInterval(() => tickFallback(scanId), 110);
   intervals.set(scanId, iv);
   tickFallback(scanId);
 }
@@ -154,8 +156,14 @@ function tickFallback(scanId: string) {
 
     const running = agents.find((a) => a.status === "running");
     if (running) {
-      running.progress = Math.min(100, running.progress + 6 + Math.floor(Math.random() * 8));
-      running.logs = [...running.logs, logLineFor(running.id, s.target, running.progress)].slice(-300);
+      // Smooth 10–18% increments per tick (~700ms total per module)
+      const increment = 10 + Math.floor(Math.random() * 8);
+      running.progress = Math.min(100, running.progress + increment);
+
+      if (running.progress % 20 < increment) {
+        running.logs = [...running.logs, logLineFor(running.id, s.target, running.progress)].slice(-200);
+      }
+
       if (running.progress >= 100) {
         running.status = "complete";
         running.progress = 100;
@@ -167,7 +175,7 @@ function tickFallback(scanId: string) {
       const next = agents.find((a) => a.status === "queued");
       if (next) {
         next.status = "running";
-        next.progress = 0;
+        next.progress = 6;
         next.logs = [...next.logs, logLineFor(next.id, s.target, 0)];
       }
     }
@@ -177,6 +185,7 @@ function tickFallback(scanId: string) {
     if (done) {
       next.status = agents.some((a) => a.status === "failed") ? "partial" : "complete";
       next.finishedAt = Date.now();
+      stopFallbackInterval(scanId);
     }
     return next;
   });

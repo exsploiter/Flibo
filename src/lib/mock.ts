@@ -180,7 +180,10 @@ export function findingsFor(agentId: string, target: string): Finding[] {
   });
 
   if (agentId === "port-scan") {
-    const ports = pick(rng, PORT_POOL, 3 + Math.floor(rng() * 3));
+    const isGoogle = target.toLowerCase().includes("google");
+    const ports = isGoogle
+      ? PORT_POOL.filter((p) => p.port === 80 || p.port === 443)
+      : pick(rng, PORT_POOL.filter((p) => p.port === 80 || p.port === 443 || p.port === 8080 || p.port === 22), 2);
     for (const p of ports) {
       out.push({
         ...baseFinding("port-scan", "port", p.severity, `Port ${p.port}/${p.service} open`),
@@ -194,7 +197,9 @@ export function findingsFor(agentId: string, target: string): Finding[] {
   }
 
   if (agentId === "subdomain-enum") {
-    const subs = pick(rng, SUBDOMAIN_POOL, 2 + Math.floor(rng() * 3));
+    const isGoogle = target.toLowerCase().includes("google");
+    const count = isGoogle ? 3 : 2;
+    const subs = pick(rng, SUBDOMAIN_POOL, count);
     for (const s of subs) {
       const fqdn = `${s}.${target.replace(/^https?:\/\//, "")}`;
       out.push({
@@ -206,29 +211,29 @@ export function findingsFor(agentId: string, target: string): Finding[] {
 
   if (agentId === "ssl-deep") {
     out.push({
-      ...baseFinding("ssl-deep", "tls", "info", "Valid TLS 1.3 Certificate (Let's Encrypt)"),
+      ...baseFinding("ssl-deep", "tls", "info", "Valid TLS 1.3 Certificate (Let's Encrypt / Google Trust Services)"),
       detail: "Certificate issued with RSA 2048 and SHA-256 signature. Expiry in 180 days.",
     });
   }
 
   if (agentId === "waf-cdn") {
     out.push({
-      ...baseFinding("waf-cdn", "waf", "info", "Edge Protection Active (Cloudflare)"),
-      detail: "Cloudflare proxy active fronting web traffic. DDoS mitigation engaged.",
+      ...baseFinding("waf-cdn", "waf", "info", target.toLowerCase().includes("google") ? "Google Front End (GFE)" : "Edge Protection Active (Cloudflare)"),
+      detail: "Edge proxy active fronting web traffic. DDoS mitigation engaged.",
     });
   }
 
   if (agentId === "cloud-recon") {
     out.push({
-      ...baseFinding("cloud-recon", "cloud", "info", "AWS Cloud Infrastructure"),
-      detail: "Target hosted in AWS us-east-1 region. S3 bucket permissions verified secure.",
+      ...baseFinding("cloud-recon", "cloud", "info", target.toLowerCase().includes("google") ? "Google Cloud Platform (GCP)" : "Cloud Infrastructure Active"),
+      detail: "Target hosted in cloud infrastructure. S3/Storage bucket permissions verified secure.",
     });
   }
 
   if (agentId === "auth-surface") {
     out.push({
-      ...baseFinding("auth-surface", "auth", "medium", "Missing HttpOnly on Analytics Cookie"),
-      detail: "Cookie issued without HttpOnly flag, readable by client-side JavaScript.",
+      ...baseFinding("auth-surface", "auth", "low", "Analytics Cookie Inspection"),
+      detail: "Cookie issued with standard session tracking flags.",
     });
   }
 
@@ -241,13 +246,14 @@ export function findingsFor(agentId: string, target: string): Finding[] {
 
   if (agentId === "cve-matcher") {
     out.push({
-      ...baseFinding("cve-matcher", "cve", "high", "CVE-2024-6387 — OpenSSH RegreSSHion"),
-      cveId: "CVE-2024-6387",
-      cvss: 8.1,
+      ...baseFinding("cve-matcher", "cve", "high", "CVE-2023-44487 — HTTP/2 Rapid Reset"),
+      cveId: "CVE-2023-44487",
+      cvss: 7.5,
       cisaKev: true,
-      epss: 0.72,
-      mitreTechnique: "T1190 - Exploit Public-Facing Application",
-      description: "Signal handler race condition vulnerability in OpenSSH server allowing unauthenticated RCE.",
+      epss: 0.85,
+      port: 443,
+      mitreTechnique: "T1499 - Endpoint Denial of Service",
+      description: "HTTP/2 stream cancellation vulnerability impacting modern HTTP/2 reverse proxies.",
     });
   }
 

@@ -261,19 +261,27 @@ function ScanDetail() {
   function reRun() {
     if (!scan) return;
     const newId = `scan-${Date.now()}`;
+    const cleanBaseName = scan.name.replace(/\s*\(re-run\)/gi, "").replace(/^Re-run — /, "").trim();
     import("@/lib/store").then(({ addScan, addTargetHistory }) => {
-      addScan({
+      const newScan: Scan = {
         ...scan,
         id: newId,
         target: scan.target,
-        name: scan.name.replace(/^Re-run — /, "") + " (re-run)",
+        name: `${cleanBaseName} (re-run)`,
         status: "running",
         paused: false,
         createdAt: Date.now(),
         findings: [],
-        agents: scan.agents.map((a, i) => ({ ...a, status: i === 0 ? "running" : "queued", progress: 0, logs: [] })),
-      });
+        agents: scan.agents.map((a, i) => ({
+          ...a,
+          status: i === 0 ? "running" : "queued",
+          progress: i === 0 ? 6 : 0,
+          logs: [],
+        })),
+      };
+      addScan(newScan);
       addTargetHistory(scan.targets);
+      api.createScan(newScan).catch(() => {});
       ensureRunner(newId);
       toast.success("Re-running with same config");
       void navigate({ to: "/scan/$id", params: { id: newId } });
@@ -421,8 +429,8 @@ function ScanDetail() {
         {/* progress + eta */}
         {(running || scan.status === "complete" || scan.status === "partial") && (
           <div className="mt-4 flex items-center gap-4">
-            <ScanProgress value={agg} active={running && !scan.paused} className="h-1.5 flex-1" height={6} />
-            <span className="font-mono text-xs text-muted-foreground">
+            <ScanProgress value={agg} active={running && !scan.paused} className="h-2 flex-1" height={8} />
+            <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
               aggregate {agg}%{running ? ` · ETA ≈ ${etaLabel}` : ""}
             </span>
           </div>
@@ -442,31 +450,46 @@ function ScanDetail() {
         )}
       </div>
 
-      {/* Agents */}
+      {/* Agents Grid */}
       <div className="no-print grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        {scan.agents.map((a) => (
-          <div key={a.id} className="rounded-2xl border border-border/60 bg-card p-4">
-            <div className="flex items-center gap-2">
-              <AgentStatusDot status={a.status} />
-              <span className="truncate text-sm font-medium">{a.name}</span>
-              <span className="ml-auto font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                {AGENT_STATUS_LABEL[a.status]}
-              </span>
+        {scan.agents.map((a) => {
+          const isAgentRunning = a.status === "running" && !scan.paused;
+          return (
+            <div
+              key={a.id}
+              className={cn(
+                "rounded-2xl border p-4 transition-all duration-300 bg-card",
+                isAgentRunning
+                  ? "border-primary/60 bg-primary/[0.04] ring-1 ring-primary/30 shadow-md shadow-primary/10"
+                  : a.status === "complete"
+                    ? "border-border/60 bg-card"
+                    : "border-border/40 bg-card/60 opacity-85"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <AgentStatusDot status={a.status} />
+                <span className={cn("truncate text-sm font-medium", isAgentRunning && "text-primary font-semibold")}>
+                  {a.name}
+                </span>
+                <span className="ml-auto font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  {AGENT_STATUS_LABEL[a.status]}
+                </span>
+              </div>
+              <ScanProgress
+                value={a.progress}
+                active={isAgentRunning}
+                className="mt-3"
+                height={5}
+              />
+              {a.error && <p className="mt-2 text-[11px] leading-snug text-critical">{a.error}</p>}
+              {a.status === "failed" && (
+                <Button variant="outline" size="sm" className="mt-2 w-full rounded-xl" onClick={() => retryAgent(scan.id, a.id)}>
+                  <RotateCcw className="size-3" /> Retry
+                </Button>
+              )}
             </div>
-            <ScanProgress
-              value={a.progress}
-              active={a.status === "running" && !scan.paused}
-              className="mt-3"
-              height={4}
-            />
-            {a.error && <p className="mt-2 text-[11px] leading-snug text-critical">{a.error}</p>}
-            {a.status === "failed" && (
-              <Button variant="outline" size="sm" className="mt-2 w-full rounded-xl" onClick={() => retryAgent(scan.id, a.id)}>
-                <RotateCcw className="size-3" /> Retry
-              </Button>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Tabs */}

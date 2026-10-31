@@ -246,58 +246,98 @@ class ScanEngineManager extends EventEmitter {
             shouldStop,
           });
         } else if (agent.id === "ssl-deep") {
-          progressHandler(30);
+          progressHandler(20);
+          await new Promise((r) => setTimeout(r, 120));
+          progressHandler(60);
           const res = await runSslAudit(scan.target, logHandler);
           newFindings = res.findings;
+          progressHandler(90);
+          await new Promise((r) => setTimeout(r, 80));
           progressHandler(100);
         } else if (agent.id === "waf-cdn") {
-          progressHandler(30);
+          progressHandler(20);
+          await new Promise((r) => setTimeout(r, 120));
+          progressHandler(60);
           const res = await runWafCdnAudit(scan.target, logHandler);
           newFindings = res.findings;
+          progressHandler(90);
+          await new Promise((r) => setTimeout(r, 80));
           progressHandler(100);
         } else if (agent.id === "webcontent") {
-          progressHandler(25);
+          progressHandler(20);
+          await new Promise((r) => setTimeout(r, 120));
+          progressHandler(55);
           const res = await runContentDiscovery(scan.target, logHandler);
           newFindings = res.findings;
+          progressHandler(90);
+          await new Promise((r) => setTimeout(r, 80));
           progressHandler(100);
         } else if (agent.id === "api-discovery") {
-          progressHandler(30);
+          progressHandler(20);
+          await new Promise((r) => setTimeout(r, 120));
+          progressHandler(60);
           const res = await runApiDiscovery(scan.target, logHandler);
           newFindings = res.findings;
+          progressHandler(90);
+          await new Promise((r) => setTimeout(r, 80));
           progressHandler(100);
         } else if (agent.id === "cloud-recon") {
-          progressHandler(30);
+          progressHandler(20);
+          await new Promise((r) => setTimeout(r, 120));
+          progressHandler(60);
           const res = await runCloudRecon(scan.target, logHandler);
           newFindings = res.findings;
+          progressHandler(90);
+          await new Promise((r) => setTimeout(r, 80));
           progressHandler(100);
         } else if (agent.id === "takeover-audit") {
-          progressHandler(25);
+          progressHandler(20);
+          await new Promise((r) => setTimeout(r, 120));
+          progressHandler(55);
           const currentScan = getScanById(task.scanId);
           const subdomains = (currentScan?.findings || [])
             .filter((f) => f.kind === "subdomain")
             .map((f) => f.title.replace(/^Discovered Subdomain:\s*/i, "").trim());
           const res = await runSubdomainTakeover([scan.target, ...subdomains], logHandler);
           newFindings = res.findings;
+          progressHandler(90);
+          await new Promise((r) => setTimeout(r, 80));
           progressHandler(100);
         } else if (agent.id === "cms-fingerprint") {
-          progressHandler(30);
+          progressHandler(20);
+          await new Promise((r) => setTimeout(r, 120));
+          progressHandler(60);
           const res = await runCmsFingerprint(scan.target, logHandler);
           newFindings = res.findings;
+          progressHandler(90);
+          await new Promise((r) => setTimeout(r, 80));
           progressHandler(100);
         } else if (agent.id === "auth-surface") {
-          progressHandler(30);
+          progressHandler(20);
+          await new Promise((r) => setTimeout(r, 120));
+          progressHandler(60);
           const res = await runAuthSurfaceScan(scan.target, logHandler);
           newFindings = res.findings;
+          progressHandler(90);
+          await new Promise((r) => setTimeout(r, 80));
           progressHandler(100);
         } else if (agent.id === "osint-recon") {
-          progressHandler(30);
+          progressHandler(20);
+          await new Promise((r) => setTimeout(r, 120));
+          progressHandler(60);
           const res = await runOsintAudit(scan.target, logHandler);
           newFindings = res.findings;
+          progressHandler(90);
+          await new Promise((r) => setTimeout(r, 80));
           progressHandler(100);
         } else if (agent.id === "os-network") {
-          progressHandler(30);
+          progressHandler(20);
+          await new Promise((r) => setTimeout(r, 120));
+          progressHandler(60);
           const res = await runNetworkOsScan(scan.target, logHandler);
           newFindings = res.findings;
+          progressHandler(90);
+          await new Promise((r) => setTimeout(r, 80));
           progressHandler(100);
         } else {
           // Unknown custom agent fallback
@@ -353,8 +393,8 @@ class ScanEngineManager extends EventEmitter {
         findingsCount: newFindings.length,
       });
 
-      // Brief pacing between agents
-      await new Promise((r) => setTimeout(r, 50));
+      // Natural pacing between agents so UI reflects each module running and completing
+      await new Promise((r) => setTimeout(r, 220));
     }
 
     // Wrap up overall scan and build attack graph

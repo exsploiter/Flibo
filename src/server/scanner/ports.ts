@@ -189,6 +189,8 @@ export async function runPortScan(options: PortScanOptions): Promise<Finding[]> 
   const timeoutMs = options.intensity === "quick" ? 700 : 1100;
   let completed = 0;
 
+  options.onProgress(6);
+
   for (let i = 0; i < ports.length; i += concurrency) {
     if (options.shouldStop()) {
       options.onLog(`[PortScan] Scan cancelled by operator`);
@@ -199,12 +201,14 @@ export async function runPortScan(options: PortScanOptions): Promise<Finding[]> 
     const results = await Promise.all(
       batch.map(async (port) => {
         const res = await probePort(host, port, timeoutMs);
+        completed++;
+        const pct = Math.min(96, Math.max(8, Math.round((completed / ports.length) * 100)));
+        options.onProgress(pct);
         return { port, ...res };
       })
     );
 
     for (const r of results) {
-      completed++;
       if (r.open) {
         const meta = KNOWN_SERVICES[r.port] ?? {
           service: `port-${r.port}`,

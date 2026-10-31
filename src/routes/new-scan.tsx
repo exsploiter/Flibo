@@ -140,8 +140,8 @@ function NewScan() {
         id: a.id,
         name: a.name,
         status: i === 0 ? "running" : "queued",
-        progress: 0,
-        logs: [],
+        progress: i === 0 ? 6 : 0,
+        logs: [`[${new Date().toTimeString().slice(0, 8)}] Registered probe agent`],
       })),
       findings: [],
     };
