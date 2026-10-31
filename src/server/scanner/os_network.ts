@@ -30,7 +30,7 @@ export async function runNetworkOsScan(
     const { stdout } = await execAsync("nmap --version");
     if (stdout.includes("Nmap version")) {
       nmapAvailable = true;
-      const version = stdout.split("\n")[0].trim();
+      const version = stdout.split("\n")[0]?.trim() || "Nmap";
       emit(`[os_network] Native host nmap provider detected: ${version}`);
       findings.push({
         id: `net-nmap-${Date.now()}`,

@@ -32,6 +32,20 @@ export interface LogLine {
   text: string;
 }
 
+export interface AppSettings {
+  cveApiKey?: string;
+  nmapBackendUrl?: string;
+  notifyInApp: boolean;
+  notifyEmail: boolean;
+  notifyEmailTo: string;
+  webhookUrl?: string;
+  defaultProfile: string;
+  retentionDays: string;
+  operatorName?: string;
+  clientName?: string;
+  engagementName?: string;
+}
+
 export interface ScanAgent {
   id: string;
   name: string;

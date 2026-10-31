@@ -275,49 +275,5 @@ function seededAgents(
 }
 
 export function seedScans(): Scan[] {
-  const now = Date.now();
-  const t1 = "acme-labs.dev";
-
-  const scan1: Scan = {
-    id: "scan-seed-1",
-    name: "Full perimeter sweep — acme-labs.dev",
-    target: t1,
-    targets: [t1, "203.0.113.17"],
-    tags: ["perimeter", "v2-recon"],
-    config: { intensity: "deep", agents: AGENTS.map((a) => a.id), ports: "top-1000", stealth: false, scheduled: null },
-    status: "complete",
-    createdAt: now - 1000 * 60 * 60 * 26,
-    finishedAt: now - 1000 * 60 * 60 * 26 + 1000 * 60 * 8,
-    agents: seededAgents(t1, AGENTS.map((a) => ({ id: a.id, status: "complete" as const }))),
-    findings: [
-      ...findingsFor("port-scan", t1),
-      ...findingsFor("subdomain-enum", t1),
-      ...findingsFor("cve-matcher", t1),
-      ...findingsFor("ssl-deep", t1),
-      ...findingsFor("waf-cdn", t1),
-      ...findingsFor("cloud-recon", t1),
-      ...findingsFor("auth-surface", t1),
-      ...findingsFor("osint-recon", t1),
-    ],
-  };
-
-  const t2 = "10.0.4.0/24";
-  const scan2: Scan = {
-    id: "scan-seed-2",
-    name: "Internal segment sweep — 10.0.4.0/24",
-    target: t2,
-    targets: [t2],
-    tags: ["internal", "network"],
-    config: { intensity: "quick", agents: ["port-scan", "os-detection"], ports: "top-100", stealth: true, scheduled: null },
-    status: "complete",
-    createdAt: now - 1000 * 60 * 60 * 4,
-    finishedAt: now - 1000 * 60 * 60 * 4 + 1000 * 60 * 3,
-    agents: seededAgents(t2, [
-      { id: "port-scan", status: "complete" },
-      { id: "os-detection", status: "complete" },
-    ]),
-    findings: [...findingsFor("port-scan", t2)],
-  };
-
-  return [scan1, scan2];
+  return [];
 }

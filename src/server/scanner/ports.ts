@@ -136,7 +136,11 @@ function probePort(
       resolved = true;
       socket.removeAllListeners();
       socket.destroy();
-      resolve({ open, latencyMs: Date.now() - start, banner: banner.trim() || undefined });
+      if (banner.trim()) {
+        resolve({ open, latencyMs: Date.now() - start, banner: banner.trim() });
+      } else {
+        resolve({ open, latencyMs: Date.now() - start });
+      }
     };
 
     socket.connect(port, host, () => {

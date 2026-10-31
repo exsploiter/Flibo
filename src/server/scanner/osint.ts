@@ -17,8 +17,8 @@ export async function runOsintAudit(
     if (onLog) onLog(msg);
   }
 
-  const host = target.replace(/^https?:\/\//i, "").split(/[/:]/)[0];
-  const domain = host.split(".").slice(-2).join(".");
+  const host = target.replace(/^https?:\/\//i, "").split(/[/:]/)[0] || target;
+  const domain = host.split(".").slice(-2).join(".") || host;
 
   emit(`[osint] Initiating passive OSINT exposure correlation for domain '${domain}'`);
 

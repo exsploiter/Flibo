@@ -57,7 +57,7 @@ function ensure(): Scan[] {
   } catch {
     // corrupted store — reseed
   }
-  state = seedScans();
+  state = [];
   persist();
   syncWithBackend();
   return state;

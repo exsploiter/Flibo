@@ -2,7 +2,7 @@ import type { Finding } from "../types";
 
 export interface WafCdnResult {
   detected: boolean;
-  provider?: string;
+  provider?: string | undefined;
   findings: Finding[];
   logs: string[];
 }

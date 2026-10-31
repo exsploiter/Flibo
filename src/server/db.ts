@@ -61,12 +61,12 @@ function loadDb(): DatabaseSchema {
     }
   }
 
-  // Seed default database
+  // Default empty database
   memoryDb = {
     version: 1,
-    scans: seedScans(),
+    scans: [],
     settings: { ...DEFAULT_SETTINGS },
-    targetHistory: ["scanme.nmap.org", "example.com", "192.168.1.1"],
+    targetHistory: [],
     updatedAt: Date.now(),
   };
   saveDbSync();
@@ -95,7 +95,7 @@ export function scheduleSave(): void {
 }
 
 // Scans CRUD
-export function listScans(query?: { search?: string; status?: string; limit?: number; offset?: number }): Scan[] {
+export function listScans(query?: { search?: string | undefined; status?: string | undefined; limit?: number | undefined; offset?: number | undefined }): Scan[] {
   const db = loadDb();
   let list = [...db.scans];
 

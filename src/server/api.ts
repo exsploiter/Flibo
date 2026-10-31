@@ -355,11 +355,14 @@ export function handleNodeApi(req: IncomingMessage, res: ServerResponse): void {
         }
       }
 
-      const webRequest = new Request(url, {
-        method: req.method,
+      const reqInit: RequestInit = {
+        method: req.method || "GET",
         headers,
-        body: hasBody ? body : undefined,
-      });
+      };
+      if (hasBody && body) {
+        reqInit.body = body;
+      }
+      const webRequest = new Request(url, reqInit);
 
       const webResponse = await handleApiRequest(webRequest);
 

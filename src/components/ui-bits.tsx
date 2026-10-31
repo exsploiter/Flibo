@@ -32,7 +32,7 @@ export const SCAN_STATUS_LABEL: Record<ScanStatus, string> = {
   cancelled: "Cancelled",
 };
 
-export function ScanStatusPill({ status, paused }: { status: ScanStatus; paused?: boolean }) {
+export function ScanStatusPill({ status, paused }: { status: ScanStatus; paused?: boolean | undefined }) {
   const style =
     status === "running"
       ? paused

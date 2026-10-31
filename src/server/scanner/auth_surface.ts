@@ -32,7 +32,7 @@ export async function runAuthSurfaceScan(
 
     for (const cookie of setCookies.filter(Boolean)) {
       const lower = cookie.toLowerCase();
-      const name = cookie.split("=")[0].trim();
+      const name = cookie.split("=")[0]?.trim() || "unknown";
 
       const isSecure = lower.includes("secure");
       const isHttpOnly = lower.includes("httponly");

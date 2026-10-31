@@ -17,8 +17,8 @@ export async function runCloudRecon(
     if (onLog) onLog(msg);
   }
 
-  const host = target.replace(/^https?:\/\//i, "").split(/[/:]/)[0];
-  const nameBase = host.split(".")[0];
+  const host = target.replace(/^https?:\/\//i, "").split(/[/:]/)[0] || target;
+  const nameBase = host.split(".")[0] || host;
 
   emit(`[cloud_recon] Auditing cloud storage permutations for '${nameBase}'`);
 

@@ -15,6 +15,7 @@ import { parseTargets, TYPE_LABELS, type DetectedType } from "@/lib/detect";
 import { AGENTS } from "@/lib/mock";
 import { addScan, addTargetHistory, getTargetHistory } from "@/lib/store";
 import { ensureRunner } from "@/lib/runner";
+import { api } from "@/lib/api";
 import type { Scan } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -146,6 +147,10 @@ function NewScan() {
     };
     addScan(scan);
     addTargetHistory(targets);
+    // Persist and initiate execution via backend scan engine
+    api.createScan(scan).catch((err) => {
+      console.warn("Backend API scan launch fallback:", err);
+    });
     ensureRunner(id);
     toast.success("Scan launched", { description: scan.name });
     void navigate({ to: "/scan/$id", params: { id } });

@@ -8,8 +8,8 @@ export interface AttackVector {
   why: string;
   confidence: number;
   findingId: string;
-  mitreTechnique?: string;
-  cisaKev?: boolean;
+  mitreTechnique?: string | undefined;
+  cisaKev?: boolean | undefined;
 }
 
 export function synthesizeVectors(findings: Finding[]): AttackVector[] {

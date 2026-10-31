@@ -28,6 +28,7 @@ import {
   GitFork,
   Briefcase,
   ShieldAlert,
+  Layers,
 } from "lucide-react";
 import { useScan } from "@/lib/store";
 import { api } from "@/lib/api";
@@ -37,6 +38,7 @@ import { aggregateProgress, countBySeverity, riskScore, synthesizeVectors, gener
 import { copyText, download, scanToCsv, scanToJson, scanToMarkdown, scanToExecutiveSummary, scanToTicketing, safeFileName } from "@/lib/export";
 import { SEVERITY_ORDER, severityWeight, type Finding, type Scan } from "@/lib/types";
 import { AgentStatusDot, AGENT_STATUS_LABEL, EmptyState, ScanStatusPill, SeverityBadge } from "@/components/ui-bits";
+import { AttackGraph3D } from "@/components/AttackGraph3D";
 import { LogConsole } from "@/components/LogConsole";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -168,6 +170,7 @@ function ScanDetail() {
   const scan = localScan || remoteScan;
 
   const [tab, setTab] = useState<TabId>("summary");
+  const [graphViewMode, setGraphViewMode] = useState<"3d" | "2d">("3d");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<{ key: "port" | "severity" | "service"; dir: 1 | -1 }>({ key: "port", dir: 1 });
   const [expandedFinding, setExpandedFinding] = useState<string | null>(null);
@@ -248,27 +251,26 @@ function ScanDetail() {
   }
 
   function updateFinding(f: Finding, updater: (nf: Finding) => Finding) {
-    // findings are updated in place through the scan object
-    const { useScansStore } = { useScansStore: null as never };
-    void useScansStore;
+    if (!scan) return;
     import("@/lib/store").then(({ updateScan }) =>
       updateScan(scan.id, (s) => ({ ...s, findings: s.findings.map((x) => (x.id === f.id ? updater(x) : x)) })),
     );
   }
 
   function reRun() {
+    if (!scan) return;
     const newId = `scan-${Date.now()}`;
     import("@/lib/store").then(({ addScan, addTargetHistory }) => {
       addScan({
         ...scan,
         id: newId,
+        target: scan.target,
         name: scan.name.replace(/^Re-run — /, "") + " (re-run)",
         status: "running",
         paused: false,
         createdAt: Date.now(),
-        finishedAt: undefined,
         findings: [],
-        agents: scan.agents.map((a, i) => ({ ...a, status: i === 0 ? "running" : "queued", progress: 0, logs: [], error: undefined })),
+        agents: scan.agents.map((a, i) => ({ ...a, status: i === 0 ? "running" : "queued", progress: 0, logs: [] })),
       });
       addTargetHistory(scan.targets);
       ensureRunner(newId);
@@ -369,7 +371,7 @@ function ScanDetail() {
               <DropdownMenuContent align="end" className="rounded-xl border-border/60 bg-popover">
                 <DropdownMenuItem
                   onClick={() => {
-                    download(`${safeFileName(scan)}.json`, scanToJson(scan), "application/json");
+                    download(`${safeFileName(scan.name)}.json`, scanToJson(scan), "application/json");
                     toast.success("Exported JSON");
                   }}
                 >
@@ -377,7 +379,7 @@ function ScanDetail() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    download(`${safeFileName(scan)}.csv`, scanToCsv(scan), "text/csv");
+                    download(`${safeFileName(scan.name)}.csv`, scanToCsv(scan), "text/csv");
                     toast.success("Exported CSV");
                   }}
                 >
@@ -385,7 +387,7 @@ function ScanDetail() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    download(`${safeFileName(scan)}_executive.md`, scanToExecutiveSummary(scan), "text/markdown");
+                    download(`${safeFileName(scan.name)}_executive.md`, scanToExecutiveSummary(scan), "text/markdown");
                     toast.success("Exported Executive Briefing");
                   }}
                 >
@@ -393,7 +395,7 @@ function ScanDetail() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    download(`${safeFileName(scan)}_tickets.txt`, scanToTicketing(scan), "text/plain");
+                    download(`${safeFileName(scan.name)}_tickets.txt`, scanToTicketing(scan), "text/plain");
                     toast.success("Exported Ticketing Format");
                   }}
                 >
@@ -550,75 +552,114 @@ function ScanDetail() {
 
           {tab === "graph" && (
             <div className="space-y-6">
-              <div className="rounded-3xl border border-border/60 bg-card p-6">
-                <div className="flex items-center justify-between pb-4 border-b border-border/40">
-                  <div>
-                    <h3 className="font-semibold text-base flex items-center gap-2">
-                      <GitFork className="size-4 text-primary" /> Multi-Hop Attack Path Graph
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Synthesized directed attack chain from target perimeter to correlated vulnerabilities.
-                    </p>
-                  </div>
-                  <span className="font-mono text-xs text-muted-foreground">
-                    {scan.findings.length} findings mapped
-                  </span>
+              {/* Header with 3D / 2D View Switcher */}
+              <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+                <div>
+                  <h3 className="font-semibold text-base flex items-center gap-2">
+                    <GitFork className="size-4 text-primary" /> Attack Graph & Technical Composition
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Multi-hop directed graph mapping perimeters, web architecture & validated flaws in 3D.
+                  </p>
                 </div>
 
-                <div className="mt-6 flex flex-col md:flex-row items-stretch gap-6 overflow-x-auto pb-4">
-                  {/* Root Target Node */}
-                  <div className="flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-primary/40 bg-primary/5 min-w-[200px]">
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-primary font-semibold">Origin Target</span>
-                    <span className="font-mono text-sm font-bold mt-1 text-center truncate max-w-[180px]">{scan.target}</span>
-                    <span className="mt-2 text-[11px] rounded-lg bg-card px-2 py-0.5 border border-border/50 text-muted-foreground">Scanned Asset</span>
-                  </div>
-
-                  <div className="hidden md:flex items-center text-muted-foreground/40 font-mono text-xl">➔</div>
-
-                  {/* Surface Level: Ports & Services */}
-                  <div className="flex flex-col gap-3 min-w-[240px]">
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">1. Discovered Perimeters</span>
-                    {scan.findings.filter((f) => f.kind === "port" || f.kind === "subdomain").slice(0, 5).map((p) => (
-                      <div key={p.id} className="p-3 rounded-xl border border-border/60 bg-muted/30">
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono text-xs font-semibold">{p.kind === "port" ? `Port ${p.port}/${p.service}` : p.title}</span>
-                          <SeverityBadge severity={p.severity} />
-                        </div>
-                        <span className="text-[11px] text-muted-foreground truncate block mt-1">{p.detail || p.banner || "Reachable endpoint"}</span>
-                      </div>
-                    ))}
-                    {scan.findings.filter((f) => f.kind === "port" || f.kind === "subdomain").length === 0 && (
-                      <p className="text-xs text-muted-foreground">No open perimeters identified.</p>
+                <div className="flex items-center gap-1 rounded-xl border border-border/60 bg-muted/30 p-1">
+                  <button
+                    onClick={() => setGraphViewMode("3d")}
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-lg px-3 py-1 font-mono text-xs transition-colors",
+                      graphViewMode === "3d"
+                        ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                        : "text-muted-foreground hover:text-foreground"
                     )}
-                  </div>
-
-                  <div className="hidden md:flex items-center text-muted-foreground/40 font-mono text-xl">➔</div>
-
-                  {/* Weaponized Vector Level: CVEs, Leaks, Takeovers */}
-                  <div className="flex flex-col gap-3 flex-1 min-w-[280px]">
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">2. Correlated Exploits & Pivots</span>
-                    {scan.findings.filter((f) => ["cve", "takeover", "cloud", "content", "auth"].includes(f.kind)).slice(0, 5).map((v) => (
-                      <div key={v.id} className="p-3 rounded-xl border border-border/70 bg-card shadow-xs">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-mono text-xs font-bold text-primary truncate">{v.title}</span>
-                          <SeverityBadge severity={v.severity} />
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{v.detail || v.description || v.note}</p>
-                        {v.mitreTechnique && (
-                          <div className="mt-2 font-mono text-[10px] text-muted-foreground/80 flex items-center gap-1.5">
-                            <span className="font-semibold text-primary">MITRE:</span> {v.mitreTechnique}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                    {scan.findings.filter((f) => ["cve", "takeover", "cloud", "content", "auth"].includes(f.kind)).length === 0 && (
-                      <div className="rounded-xl border border-border/50 bg-muted/20 p-4 text-center">
-                        <p className="text-xs text-muted-foreground">No multi-hop exploit paths discovered.</p>
-                      </div>
+                  >
+                    <Network className="size-3.5" /> 3D Web Mesh
+                  </button>
+                  <button
+                    onClick={() => setGraphViewMode("2d")}
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-lg px-3 py-1 font-mono text-xs transition-colors",
+                      graphViewMode === "2d"
+                        ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                        : "text-muted-foreground hover:text-foreground"
                     )}
-                  </div>
+                  >
+                    <Layers className="size-3.5" /> 2D Path Matrix
+                  </button>
                 </div>
               </div>
+
+              {graphViewMode === "3d" ? (
+                <AttackGraph3D scan={scan} />
+              ) : (
+                <div className="rounded-3xl border border-border/60 bg-card p-6">
+                  <div className="flex items-center justify-between pb-4 border-b border-border/40">
+                    <div>
+                      <h4 className="font-semibold text-sm">2D Linear Attack Vector Chain</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Directed progression from scanned asset perimeter into correlated pivots.
+                      </p>
+                    </div>
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {scan.findings.length} findings mapped
+                    </span>
+                  </div>
+
+                  <div className="mt-6 flex flex-col md:flex-row items-stretch gap-6 overflow-x-auto pb-4">
+                    {/* Root Target Node */}
+                    <div className="flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-primary/40 bg-primary/5 min-w-[200px]">
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-primary font-semibold">Origin Target</span>
+                      <span className="font-mono text-sm font-bold mt-1 text-center truncate max-w-[180px]">{scan.target}</span>
+                      <span className="mt-2 text-[11px] rounded-lg bg-card px-2 py-0.5 border border-border/50 text-muted-foreground">Scanned Asset</span>
+                    </div>
+
+                    <div className="hidden md:flex items-center text-muted-foreground/40 font-mono text-xl">➔</div>
+
+                    {/* Surface Level: Ports & Services */}
+                    <div className="flex flex-col gap-3 min-w-[240px]">
+                      <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">1. Discovered Perimeters</span>
+                      {scan.findings.filter((f) => f.kind === "port" || f.kind === "subdomain").slice(0, 5).map((p) => (
+                        <div key={p.id} className="p-3 rounded-xl border border-border/60 bg-muted/30">
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono text-xs font-semibold">{p.kind === "port" ? `Port ${p.port}/${p.service}` : p.title}</span>
+                            <SeverityBadge severity={p.severity} />
+                          </div>
+                          <span className="text-[11px] text-muted-foreground truncate block mt-1">{p.detail || p.banner || "Reachable endpoint"}</span>
+                        </div>
+                      ))}
+                      {scan.findings.filter((f) => f.kind === "port" || f.kind === "subdomain").length === 0 && (
+                        <p className="text-xs text-muted-foreground">No open perimeters identified.</p>
+                      )}
+                    </div>
+
+                    <div className="hidden md:flex items-center text-muted-foreground/40 font-mono text-xl">➔</div>
+
+                    {/* Weaponized Vector Level: CVEs, Leaks, Takeovers */}
+                    <div className="flex flex-col gap-3 flex-1 min-w-[280px]">
+                      <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">2. Correlated Exploits & Pivots</span>
+                      {scan.findings.filter((f) => ["cve", "takeover", "cloud", "content", "auth"].includes(f.kind)).slice(0, 5).map((v) => (
+                        <div key={v.id} className="p-3 rounded-xl border border-border/70 bg-card shadow-xs">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-mono text-xs font-bold text-primary truncate">{v.title}</span>
+                            <SeverityBadge severity={v.severity} />
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{v.detail || v.description || v.note}</p>
+                          {v.mitreTechnique && (
+                            <div className="mt-2 font-mono text-[10px] text-muted-foreground/80 flex items-center gap-1.5">
+                              <span className="font-semibold text-primary">MITRE:</span> {v.mitreTechnique}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      {scan.findings.filter((f) => ["cve", "takeover", "cloud", "content", "auth"].includes(f.kind)).length === 0 && (
+                        <div className="rounded-xl border border-border/50 bg-muted/20 p-4 text-center">
+                          <p className="text-xs text-muted-foreground">No multi-hop exploit paths discovered.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

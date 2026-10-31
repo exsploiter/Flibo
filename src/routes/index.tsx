@@ -45,7 +45,7 @@ export const Route = createFileRoute("/")({
   }),
 });
 
-function StatusDot({ status, paused }: { status: Scan["status"]; paused?: boolean }) {
+function StatusDot({ status, paused }: { status: Scan["status"]; paused?: boolean | undefined }) {
   if (status === "running") {
     return (
       <span className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground">
