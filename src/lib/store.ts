@@ -99,11 +99,13 @@ function setAll(next: Scan[]) {
 
 export function addScan(scan: Scan) {
   setAll([scan, ...ensure().filter((s) => s.id !== scan.id)]);
-  // sync to backend
+  // sync to backend once
   api
     .createScan(scan)
     .then((created) => {
-      setAll([created, ...ensure().filter((s) => s.id !== created.id)]);
+      if (created?.id) {
+        setAll([created, ...ensure().filter((s) => s.id !== created.id && s.id !== scan.id)]);
+      }
     })
     .catch((err) => {
       console.warn("[Store] Failed to save scan to backend:", err);
@@ -114,12 +116,13 @@ export function updateScan(id: string, updater: (s: Scan) => Scan) {
   const current = ensure();
   const next = current.map((s) => (s.id === id ? updater(s) : s));
   setAll(next);
+  // NOTE: Do NOT spam api.updateScan() here — progress/log ticks are local and streaming!
+}
 
-  const updatedItem = next.find((s) => s.id === id);
-  if (updatedItem) {
-    api.updateScan(id, updatedItem).catch(() => {
-      // ignore
-    });
+export function saveScanToBackend(id: string) {
+  const item = getScan(id);
+  if (item) {
+    api.updateScan(id, item).catch(() => {});
   }
 }
 

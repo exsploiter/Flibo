@@ -281,7 +281,6 @@ function ScanDetail() {
       };
       addScan(newScan);
       addTargetHistory(scan.targets);
-      api.createScan(newScan).catch(() => {});
       ensureRunner(newId);
       toast.success("Re-running with same config");
       void navigate({ to: "/scan/$id", params: { id: newId } });

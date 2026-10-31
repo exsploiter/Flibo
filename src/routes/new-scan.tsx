@@ -147,10 +147,6 @@ function NewScan() {
     };
     addScan(scan);
     addTargetHistory(targets);
-    // Persist and initiate execution via backend scan engine
-    api.createScan(scan).catch((err) => {
-      console.warn("Backend API scan launch fallback:", err);
-    });
     ensureRunner(id);
     toast.success("Scan launched", { description: scan.name });
     void navigate({ to: "/scan/$id", params: { id } });

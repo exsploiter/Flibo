@@ -95,17 +95,21 @@ export function ensureRunner(scanId: string) {
           status: data.status !== undefined ? (data.status as any) : s.status,
         }));
       },
+      onError() {
+        if (!hasReceivedBackendEvent) {
+          startFallbackInterval(scanId);
+        }
+      },
     });
 
     activeStreams.set(scanId, unsubscribe);
 
-    // If backend doesn't respond within 500ms, immediately start progressive simulation
-    // so the operator NEVER experiences a frozen screen!
+    // Fallback safeguard: only start if backend is completely silent/unresponsive after 2.8s
     setTimeout(() => {
-      if (!hasReceivedBackendEvent) {
+      if (!hasReceivedBackendEvent && activeStreams.has(scanId)) {
         startFallbackInterval(scanId);
       }
-    }, 500);
+    }, 2800);
   } else {
     startFallbackInterval(scanId);
   }

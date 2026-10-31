@@ -1,4 +1,5 @@
 import net from "node:net";
+import dns from "node:dns/promises";
 import type { Finding, Severity } from "../types";
 
 export interface PortScanOptions {
@@ -185,8 +186,20 @@ export async function runPortScan(options: PortScanOptions): Promise<Finding[]> 
   options.onLog(`[PortScan] Initiating TCP port probe against ${host} (${ports.length} target ports)`);
   options.onLog(`[PortScan] Intensity: ${options.intensity} · Stealth: ${options.stealth ? "ENABLED" : "DISABLED"}`);
 
+  // Resolve hostname to IP once to eliminate redundant DNS overhead per socket
+  let targetIp = host;
+  try {
+    const addresses = await dns.resolve4(host);
+    if (addresses && addresses[0]) {
+      targetIp = addresses[0];
+      options.onLog(`[PortScan] Resolved ${host} -> ${targetIp}`);
+    }
+  } catch {
+    // Keep raw host if lookup fails (e.g. localhost or IP)
+  }
+
   const concurrency = options.stealth ? 6 : 20;
-  const timeoutMs = options.intensity === "quick" ? 700 : 1100;
+  const timeoutMs = options.intensity === "quick" ? 600 : 900;
   let completed = 0;
 
   options.onProgress(6);
@@ -200,7 +213,7 @@ export async function runPortScan(options: PortScanOptions): Promise<Finding[]> 
     const batch = ports.slice(i, i + concurrency);
     const results = await Promise.all(
       batch.map(async (port) => {
-        const res = await probePort(host, port, timeoutMs);
+        const res = await probePort(targetIp, port, timeoutMs);
         completed++;
         const pct = Math.min(96, Math.max(8, Math.round((completed / ports.length) * 100)));
         options.onProgress(pct);

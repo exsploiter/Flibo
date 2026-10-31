@@ -107,6 +107,7 @@ export const api = {
       onScanComplete?: (status: string) => void;
       onSnapshot?: (scan: Scan) => void;
       onStatusChange?: (data: { paused?: boolean; status?: string }) => void;
+      onError?: () => void;
     }
   ): () => void {
     if (typeof window === "undefined" || !("EventSource" in window)) {
@@ -114,6 +115,10 @@ export const api = {
     }
 
     const es = new EventSource(`/api/scans/${scanId}/events`);
+
+    es.onerror = () => {
+      callbacks.onError?.();
+    };
 
     es.addEventListener("snapshot", (e) => {
       try {
