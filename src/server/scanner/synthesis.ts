@@ -19,20 +19,24 @@ export function countFindingsBySeverity(findings: Finding[]): Record<Severity, n
 export function computeRiskScore(findings: Finding[]): number {
   if (findings.length === 0) return 0;
   const counts = countFindingsBySeverity(findings);
-  
-  // EPSS and KEV boost
+
+  // EPSS and KEV boost — capped to prevent inflation
   let boost = 0;
   for (const f of findings) {
-    if (f.cisaKev) boost += 10;
-    if (f.epss && f.epss > 0.5) boost += 8;
+    if (f.cisaKev) boost += 4;
+    if (f.epss && f.epss > 0.5) boost += 2;
   }
+  boost = Math.min(boost, 15); // cap total boost
 
+  // Calibrated weights matching frontend riskScore():
+  // 2 criticals + 3 highs + boosts → ~44, not 100
+  // A heavily exposed target with 5+ criticals → ~75-85
   const raw =
-    counts.critical * 28 +
-    counts.high * 16 +
-    counts.medium * 7 +
-    counts.low * 2 +
-    counts.info * 0.5 +
+    counts.critical * 12 +
+    counts.high * 5 +
+    counts.medium * 2 +
+    counts.low * 0.5 +
+    counts.info * 0.1 +
     boost;
 
   return Math.min(100, Math.round(raw));

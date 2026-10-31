@@ -168,12 +168,25 @@ export function computeHistoricalDelta(
 
 export function riskScore(findings: Finding[]): number {
   const counts = countBySeverity(findings);
+
+  // EPSS / KEV boost — capped to prevent runaway inflation
   let boost = 0;
   for (const f of findings) {
-    if (f.cisaKev) boost += 10;
-    if (f.epss && f.epss > 0.5) boost += 8;
+    if (f.cisaKev) boost += 4;
+    if (f.epss && f.epss > 0.5) boost += 2;
   }
-  const raw = counts.critical * 20 + counts.high * 10 + counts.medium * 4 + counts.low * 1.5 + boost;
+  boost = Math.min(boost, 15); // cap total boost
+
+  // Calibrated weights: even 5 criticals won't exceed ~80 before boosts
+  // Typical internet-facing web app with a few highs lands 25-50
+  const raw =
+    counts.critical * 12 +
+    counts.high * 5 +
+    counts.medium * 2 +
+    counts.low * 0.5 +
+    counts.info * 0.1 +
+    boost;
+
   return Math.min(100, Math.round(raw));
 }
 

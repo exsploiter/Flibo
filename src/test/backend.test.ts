@@ -147,7 +147,9 @@ describe("Backend Reconnaissance & Scanner Core", () => {
     expect(counts.medium).toBe(1);
 
     const score = computeRiskScore(sampleFindings);
-    expect(score).toBeGreaterThan(50);
+    // With calibrated scoring: 2 criticals + 1 medium → ~26. Should be meaningfully > 15, not inflated to 100.
+    expect(score).toBeGreaterThan(15);
+    expect(score).toBeLessThan(100);
 
     const vectors = synthesizeAttackVectors(sampleFindings);
     expect(vectors.some((v) => v.id === "vec-rce")).toBe(true);
