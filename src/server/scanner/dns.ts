@@ -169,50 +169,56 @@ export async function runDnsScan(options: DnsScanOptions): Promise<Finding[]> {
 
   options.onProgress(55);
 
-  // 3. Active DNS Bruteforce of Common Subdomains
+  // 3. Active DNS Bruteforce of Common Subdomains — run in parallel batches for speed
   const candidates = options.intensity === "deep" ? COMMON_SUBDOMAINS : COMMON_SUBDOMAINS.slice(0, 14);
   for (const prefix of candidates) {
     discoveredSubdomains.add(`${prefix}.${host}`);
   }
 
-  options.onLog(`[DnsEnum] Validating ${discoveredSubdomains.size} candidate subdomains against DNS resolvers...`);
+  const subList = Array.from(discoveredSubdomains);
+  options.onLog(`[DnsEnum] Validating ${subList.length} candidate subdomains in parallel...`);
 
   let resolvedCount = 0;
-  const subList = Array.from(discoveredSubdomains);
+  const BATCH = 8; // parallel DNS lookups per batch
 
-  for (const sub of subList) {
-    if (options.shouldStop()) break;
-    try {
-      const ips = await dns.resolve4(sub);
-      if (ips && ips.length > 0) {
-        resolvedCount++;
-        const isSensitive = /staging|admin|internal|vpn|dev|db|corp|auth/.test(sub);
-        const severity = isSensitive ? "medium" : "info";
+    for (let i = 0; i < subList.length; i += BATCH) {
+      if (options.shouldStop()) break;
+          const batch = subList.slice(i, i + BATCH);
+          const results = await Promise.allSettled(
+            batch.map(async (sub) => {
+              const ips = await dns.resolve4(sub);
+              return { sub, ips };
+            })
+          );
 
-        options.onLog(`[DnsEnum] [+] RESOLVED: ${sub} -> [${ips.join(", ")}]`);
+          for (const r of results) {
+            if (r.status === "fulfilled" && r.value.ips.length > 0) {
+              const { sub, ips } = r.value;
+              resolvedCount++;
+              const isSensitive = /staging|admin|internal|vpn|dev|db|corp|auth/.test(sub);
+              const severity = isSensitive ? "medium" : "info";
+              options.onLog(`[DnsEnum] [+] RESOLVED: ${sub} -> [${ips.join(", ")}]`);
+              findings.push({
+                id: `find-sub-${sub}-${Date.now()}`,
+                agent: "subdomain-enum",
+                kind: "subdomain",
+                severity,
+                title: `Discovered Subdomain: ${sub}`,
+                detail: `Active DNS resolution for ${sub} points to: ${ips.join(", ")}. ${isSensitive ? "High value target (administrative/internal/staging environment)." : ""
+                  }`,
+                tags: ["subdomain", "dns", isSensitive ? "sensitive-asset" : "public-asset"],
+                note: `Resolved IPv4: ${ips.join(", ")}`,
+              });
+            }
+          }
 
-        findings.push({
-          id: `find-sub-${sub}-${Date.now()}`,
-          agent: "subdomain-enum",
-          kind: "subdomain",
-          severity,
-          title: `Discovered Subdomain: ${sub}`,
-          detail: `Active DNS resolution for ${sub} points to: ${ips.join(", ")}. ${
-            isSensitive ? "High value target (administrative/internal/staging environment)." : ""
-          }`,
-          tags: ["subdomain", "dns", isSensitive ? "sensitive-asset" : "public-asset"],
-          note: `Resolved IPv4: ${ips.join(", ")}`,
-        });
+          options.onProgress(55 + Math.round(((i + BATCH) / subList.length) * 40));
+        }
+
+        options.onProgress(100);
+        options.onLog(
+          `[DnsEnum] Subdomain enumeration completed: ${resolvedCount} live subdomains confirmed active`
+        );
+
+        return findings;
       }
-    } catch {
-      // NXDOMAIN or timed out
-    }
-  }
-
-  options.onProgress(100);
-  options.onLog(
-    `[DnsEnum] Subdomain enumeration completed: ${resolvedCount} live subdomains confirmed active`
-  );
-
-  return findings;
-}

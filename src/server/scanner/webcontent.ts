@@ -33,20 +33,26 @@ export async function runContentDiscovery(
 
   emit(`[webcontent] Starting directory & sensitive path discovery on ${baseUrl}`);
 
-  for (const probe of COMMON_PROBES) {
-    try {
-      const url = `${baseUrl}${probe.path}`;
-      const res = await fetch(url, {
-        method: "GET",
-        headers: { "User-Agent": "Flibo-SecOps/2.0" },
-        signal: AbortSignal.timeout(2500),
-      });
+      // Run all probes in parallel for speed (each has its own 2s timeout)
+      const results = await Promise.allSettled(
+        COMMON_PROBES.map(async (probe) => {
+          const url = `${baseUrl}${probe.path}`;
+          const res = await fetch(url, {
+            method: "GET",
+            headers: { "User-Agent": "Flibo-SecOps/2.0" },
+            signal: AbortSignal.timeout(2000),
+          });
+          if (res.status !== 200) return null;
+          const text = await res.text();
+          const isSoft404 = text.includes("404 Not Found") || text.includes("Page Not Found") || text.length < 20;
+          if (isSoft404) return null;
+          return { probe, url, text };
+        })
+      );
 
-      if (res.status === 200) {
-        const text = await res.text();
-        // Discard soft-404s
-        const isSoft404 = text.includes("404 Not Found") || text.includes("Page Not Found") || text.length < 20;
-        if (!isSoft404) {
+      for (const r of results) {
+        if (r.status === "fulfilled" && r.value) {
+          const { probe, url: probeUrl, text } = r.value;
           emit(`[webcontent] Found accessible path: ${probe.path} [HTTP 200, ${text.length} bytes]`);
           findings.push({
             id: `content-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -62,13 +68,10 @@ export async function runContentDiscovery(
             tags: ["content", "path", "exposure"],
             note: probe.note,
           });
+          void probeUrl; // suppress unused warning
         }
       }
-    } catch {
-      // Ignore network timeouts for paths
-    }
-  }
 
-  emit(`[webcontent] Completed path sweeps. Total exposure findings: ${findings.length}`);
-  return { findings, logs };
-}
+      emit(`[webcontent] Completed path sweeps. Total exposure findings: ${findings.length}`);
+      return { findings, logs };
+    }

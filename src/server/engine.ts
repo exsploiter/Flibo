@@ -167,7 +167,7 @@ class ScanEngineManager extends EventEmitter {
         const formatted = line.startsWith("[") ? line : `[${ts}] ${line}`;
         updateScanById(task.scanId, (s) => ({
           ...s,
-          agents: s.agents.map((a) => (a.id === agent.id ? { ...a, logs: [...a.logs, formatted].slice(-500) } : a)),
+          agents: s.agents.map((a) => (a.id === agent.id ? { ...a, logs: [...a.logs, formatted].slice(-200) } : a)),
         }));
         this.emitEvent(task.scanId, "log", { agentId: agent.id, line: formatted });
       };
@@ -182,6 +182,15 @@ class ScanEngineManager extends EventEmitter {
 
       const shouldStop = () => task.cancelled;
 
+      // Hard per-agent timeout — prevents any single agent from hanging forever
+      // quick=60s, standard=120s, deep=180s
+      const intensityMs = scan.config.intensity === "quick" ? 60_000 : scan.config.intensity === "deep" ? 180_000 : 120_000;
+      let agentTimedOut = false;
+      const agentTimeout = setTimeout(() => {
+        agentTimedOut = true;
+        logHandler(`[${agent.name}] TIMEOUT: Agent exceeded time limit — marking complete with partial results`);
+      }, intensityMs);
+
       const settings = getSettings();
       let newFindings: Finding[] = [];
       let agentFailed = false;
@@ -190,6 +199,7 @@ class ScanEngineManager extends EventEmitter {
       try {
         logHandler(`[${agent.name}] Initializing probe against target: ${scan.target}`);
 
+        const agentRun = (async () => {
         if (agent.id === "port-scan") {
           newFindings = await runPortScan({
             target: scan.target,
@@ -294,10 +304,27 @@ class ScanEngineManager extends EventEmitter {
           logHandler(`[${agent.name}] Completed standard agent execution`);
           progressHandler(100);
         }
+        })();
+
+        // Race the agent against the hard timeout
+        await Promise.race([
+          agentRun,
+          new Promise<void>((resolve) => {
+            const check = setInterval(() => {
+              if (agentTimedOut) {
+                clearInterval(check);
+                resolve();
+              }
+            }, 500);
+          }),
+        ]);
+
       } catch (err) {
         agentFailed = true;
         failureError = err instanceof Error ? err.message : String(err);
         logHandler(`[${agent.name}] ERROR: Agent encountered error: ${failureError}`);
+      } finally {
+        clearTimeout(agentTimeout);
       }
 
       if (task.cancelled) {
@@ -327,7 +354,7 @@ class ScanEngineManager extends EventEmitter {
       });
 
       // Brief pacing between agents
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, 50));
     }
 
     // Wrap up overall scan and build attack graph

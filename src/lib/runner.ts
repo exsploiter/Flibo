@@ -6,6 +6,46 @@ import { findingsFor, logLineFor } from "./mock";
 const activeStreams = new Map<string, () => void>();
 const intervals = new Map<string, ReturnType<typeof setInterval>>();
 
+// Per-scan pending log batches — flushed at most every 400ms to reduce re-renders
+const pendingLogs = new Map<string, { agentId: string; lines: string[] }[]>();
+const logFlushTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+function enqueueLogs(scanId: string, agentId: string, line: string) {
+  if (!pendingLogs.has(scanId)) pendingLogs.set(scanId, []);
+  const batch = pendingLogs.get(scanId)!;
+  const existing = batch.find((b) => b.agentId === agentId);
+  if (existing) {
+    existing.lines.push(line);
+  } else {
+    batch.push({ agentId, lines: [line] });
+  }
+
+  if (!logFlushTimers.has(scanId)) {
+    logFlushTimers.set(
+      scanId,
+      setTimeout(() => {
+        flushLogs(scanId);
+      }, 350)
+    );
+  }
+}
+
+function flushLogs(scanId: string) {
+  logFlushTimers.delete(scanId);
+  const batch = pendingLogs.get(scanId);
+  if (!batch || batch.length === 0) return;
+  pendingLogs.set(scanId, []);
+
+  updateScan(scanId, (s) => ({
+    ...s,
+    agents: s.agents.map((a) => {
+      const entry = batch.find((b) => b.agentId === a.id);
+      if (!entry) return a;
+      return { ...a, logs: [...a.logs, ...entry.lines].slice(-200) };
+    }),
+  }));
+}
+
 export function ensureRunner(scanId: string) {
   // If already streaming, no-op
   if (activeStreams.has(scanId)) return;
@@ -24,10 +64,7 @@ export function ensureRunner(scanId: string) {
       onLog(agentId, line) {
         hasReceivedBackendEvent = true;
         stopFallbackInterval(scanId);
-        updateScan(scanId, (s) => ({
-          ...s,
-          agents: s.agents.map((a) => (a.id === agentId ? { ...a, logs: [...a.logs, line].slice(-500) } : a)),
-        }));
+        enqueueLogs(scanId, agentId, line);
       },
       onProgress(agentId, progress) {
         hasReceivedBackendEvent = true;
@@ -80,6 +117,14 @@ export function stopRunner(scanId: string) {
     activeStreams.delete(scanId);
   }
   stopFallbackInterval(scanId);
+  // Flush any remaining batched logs before stopping
+  flushLogs(scanId);
+  const timer = logFlushTimers.get(scanId);
+  if (timer) {
+    clearTimeout(timer);
+    logFlushTimers.delete(scanId);
+  }
+  pendingLogs.delete(scanId);
 }
 
 function startFallbackInterval(scanId: string) {

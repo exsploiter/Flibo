@@ -42,6 +42,7 @@ import { AttackGraph3D } from "@/components/AttackGraph3D";
 import { LogConsole } from "@/components/LogConsole";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { ScanProgress } from "@/components/ScanProgress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
@@ -420,7 +421,7 @@ function ScanDetail() {
         {/* progress + eta */}
         {(running || scan.status === "complete" || scan.status === "partial") && (
           <div className="mt-4 flex items-center gap-4">
-            <Progress value={agg} className="h-1.5 flex-1" />
+            <ScanProgress value={agg} active={running && !scan.paused} className="h-1.5 flex-1" height={6} />
             <span className="font-mono text-xs text-muted-foreground">
               aggregate {agg}%{running ? ` · ETA ≈ ${etaLabel}` : ""}
             </span>
@@ -452,7 +453,12 @@ function ScanDetail() {
                 {AGENT_STATUS_LABEL[a.status]}
               </span>
             </div>
-            <Progress value={a.progress} className="mt-3 h-1" />
+            <ScanProgress
+              value={a.progress}
+              active={a.status === "running" && !scan.paused}
+              className="mt-3"
+              height={4}
+            />
             {a.error && <p className="mt-2 text-[11px] leading-snug text-critical">{a.error}</p>}
             {a.status === "failed" && (
               <Button variant="outline" size="sm" className="mt-2 w-full rounded-xl" onClick={() => retryAgent(scan.id, a.id)}>

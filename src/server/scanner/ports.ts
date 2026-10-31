@@ -185,8 +185,8 @@ export async function runPortScan(options: PortScanOptions): Promise<Finding[]> 
   options.onLog(`[PortScan] Initiating TCP port probe against ${host} (${ports.length} target ports)`);
   options.onLog(`[PortScan] Intensity: ${options.intensity} · Stealth: ${options.stealth ? "ENABLED" : "DISABLED"}`);
 
-  const concurrency = options.stealth ? 4 : 12;
-  const timeoutMs = options.intensity === "quick" ? 900 : 1500;
+  const concurrency = options.stealth ? 6 : 20;
+  const timeoutMs = options.intensity === "quick" ? 700 : 1100;
   let completed = 0;
 
   for (let i = 0; i < ports.length; i += concurrency) {
