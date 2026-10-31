@@ -75,7 +75,8 @@ const subscribe = (l: Listener) => {
 };
 
 const getSnapshot = () => ensure();
-const getServerSnapshot = (): Scan[] => [];
+const EMPTY_SERVER_SNAPSHOT: Scan[] = [];
+const getServerSnapshot = (): Scan[] => EMPTY_SERVER_SNAPSHOT;
 
 export function useScans(): Scan[] {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
