@@ -429,7 +429,7 @@ function ScanDetail() {
         {/* progress + eta */}
         {(running || scan.status === "complete" || scan.status === "partial") && (
           <div className="mt-4 flex items-center gap-4">
-            <ScanProgress value={agg} active={running && !scan.paused} className="flex-1" height={10} />
+            <ScanProgress value={agg} active={running && !scan.paused} className="flex-1" height={14} />
             <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
               aggregate {agg}%{running ? ` · ETA ≈ ${etaLabel}` : ""}
             </span>
@@ -479,7 +479,7 @@ function ScanDetail() {
                 value={a.progress}
                 active={isAgentRunning}
                 className="mt-3"
-                height={6}
+                height={8}
               />
               {a.error && <p className="mt-2 text-[11px] leading-snug text-critical">{a.error}</p>}
               {a.status === "failed" && (

@@ -213,13 +213,17 @@
   }
 }
 
-@keyframes flibo-zigzag {
+@keyframes flibo-stripes {
   0% {
-    background-position-x: 0px;
+    background-position: 0 0;
   }
   100% {
-    background-position-x: -24px;
+    background-position: 28px 0;
   }
+}
+
+.animate-stripes {
+  animation: flibo-stripes 0.9s linear infinite;
 }
 
 @keyframes flibo-laser {
@@ -229,10 +233,6 @@
   100% {
     transform: translateX(1200%);
   }
-}
-
-.animate-zigzag {
-  animation: flibo-zigzag 0.65s linear infinite;
 }
 
 .animate-laser-sweep {
