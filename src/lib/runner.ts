@@ -130,8 +130,8 @@ export function stopRunner(scanId: string) {
 
 function startFallbackInterval(scanId: string) {
   if (intervals.has(scanId)) return;
-  // High-frequency 110ms loop for ultra-fluid, non-laggy module progression
-  const iv = setInterval(() => tickFallback(scanId), 110);
+  // Calm, steady 380ms cadence so the scanner takes it slow, smooth and NEVER freezes the browser
+  const iv = setInterval(() => tickFallback(scanId), 380);
   intervals.set(scanId, iv);
   tickFallback(scanId);
 }
@@ -156,13 +156,11 @@ function tickFallback(scanId: string) {
 
     const running = agents.find((a) => a.status === "running");
     if (running) {
-      // Smooth 10–18% increments per tick (~700ms total per module)
-      const increment = 10 + Math.floor(Math.random() * 8);
+      // 4 smooth steps per module (~1.5s total per agent): 0% -> 28% -> 60% -> 90% -> 100%
+      const increment = 26 + Math.floor(Math.random() * 8);
       running.progress = Math.min(100, running.progress + increment);
 
-      if (running.progress % 20 < increment) {
-        running.logs = [...running.logs, logLineFor(running.id, s.target, running.progress)].slice(-200);
-      }
+      running.logs = [...running.logs, logLineFor(running.id, s.target, running.progress)].slice(-100);
 
       if (running.progress >= 100) {
         running.status = "complete";
@@ -175,7 +173,7 @@ function tickFallback(scanId: string) {
       const next = agents.find((a) => a.status === "queued");
       if (next) {
         next.status = "running";
-        next.progress = 6;
+        next.progress = 8;
         next.logs = [...next.logs, logLineFor(next.id, s.target, 0)];
       }
     }

@@ -16,12 +16,18 @@ function emit() {
   for (const l of listeners) l();
 }
 
+let persistTimer: ReturnType<typeof setTimeout> | null = null;
+
 function persist() {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(state));
-  } catch {
-    // storage full/unavailable — in-memory only
-  }
+  if (persistTimer) return;
+  persistTimer = setTimeout(() => {
+    persistTimer = null;
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+    } catch {
+      // storage full/unavailable — in-memory only
+    }
+  }, 800);
 }
 
 function syncWithBackend() {

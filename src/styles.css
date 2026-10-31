@@ -213,6 +213,32 @@
   }
 }
 
+@keyframes flibo-zigzag {
+  0% {
+    background-position-x: 0px;
+  }
+  100% {
+    background-position-x: -24px;
+  }
+}
+
+@keyframes flibo-laser {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(1200%);
+  }
+}
+
+.animate-zigzag {
+  animation: flibo-zigzag 0.65s linear infinite;
+}
+
+.animate-laser-sweep {
+  animation: flibo-laser 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
 @media print {
   .no-print {
     display: none !important;
